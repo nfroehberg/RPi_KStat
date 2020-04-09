@@ -1,0 +1,16 @@
+Cyclic Voltammetry Experiment
+Comment =		True
+Localtime =		2020-01-17 16:12:24
+UTC =			2020-01-17 15:12:24
+Timestamp =		1579273944.940364
+Parameters:
+Samplerate =		1KHz
+t_preconditioning1 =	5 s
+t_preconditioning2 =	2 s
+v_preconditioning1 =	-900 mV
+v_preconditioning2 =	-100 mV
+v1 =			-1850 mV
+v2 =			-100 mV
+start =			-100 mV
+n_scans =		1
+slope =			500 mV/s
