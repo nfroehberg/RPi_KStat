@@ -11,6 +11,9 @@ from redisworks import Root
 from .. import redis_config
 from time import time
 import os, shutil, base64
+from datetime import datetime
+from zipfile import ZipFile
+import flask
 
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
@@ -161,10 +164,142 @@ def directory_and_scan_selection():
         dbc.Modal(id='download_popup',
             centered = True,
             children=[
-                dbc.ModalHeader(),
-                dbc.ModalBody(),
-                dbc.ModalFooter()])
+                dbc.ModalHeader(id='download_popup_header'),
+                dbc.ModalBody(
+                    children=[
+                        dcc.RadioItems(id='download_popup_directories',
+                            inputStyle={'visibility':'hidden'},
+                            labelStyle={'display':'block'},
+                            ),
+                        html.H6(children='Files:'),
+						dcc.Checklist(id='download_popup_file_list',
+                            style={'marginLeft':'20px'},
+                            labelStyle={'display':'block'}),
+                        dcc.Checklist(id='download_popup_file_list_select_all',
+                            style={'fontStyle':'italic','marginLeft':'20px'},
+                            options=[{'label':'select all files','value':'all'}]),
+                        ]),
+                dbc.ModalFooter(
+                    children=[
+                        html.Button(id='download_files_button',children='download file(s)'),
+                        html.Button(id='download_directory_button',children='download directory')
+                        ])
+                ]),
+        dcc.Store(id='download_link_popup_placeholder1'),
+        dcc.Store(id='download_link_popup_placeholder2'),
+        dcc.Store(id='download_link_popup_placeholder3'),
+        dbc.Modal(id='download_link_popup',
+            centered = True,
+            children=[
+                dbc.ModalHeader(children='Download'),
+                dbc.ModalBody(
+                    children=[
+                        dcc.Store(id='download_file_store'),
+                        dcc.Store(id='download_directory_store'),
+                        html.Div(
+                            children=html.A(id='download-link',
+                                style={'textDecoration':'none','color':'rgb(200,200,200)',}),
+                            style={'borderWidth':'1px','padding':'10px','borderColor':'rgb(200,200,200)','borderStyle': 'dashed','borderRadius': '5px','display':'inline-block'}),
+                        ]),
+                dbc.ModalFooter()
+                ]),
         ]
+
+# serve user_downloads folder to allow download of files and directorie by user
+@app.server.route('/user_downloads/<path:path>')
+def serve_static(path):
+    root_dir = str(root.main_directory)
+    return flask.send_from_directory(
+        os.path.join(root_dir, 'user_downloads'), path
+    )
+
+# update label and download link to serve download of files or directory
+@app.callback(
+    [Output('download-link','children'),
+    Output('download-link','href')],
+    [Input('download_file_store','data'),
+    Input('download_directory_store','data')])
+def updateDownloadButton(file,folder):
+    #determining which input was triggered to determine whether to use file or folder
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
+    else:
+        trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if trigger_id == 'download_file_store':
+        label=u"\U00002913" + ' ' + file
+        return [label,'/user_downloads/{}'.format(file)]
+    elif trigger_id == 'download_directory_store':
+        label=u"\U00002913" + ' ' + folder
+        return[label,'/user_downloads/{}'.format(folder)]
+    else:
+        print('Error updating download button')
+        raise PreventUpdate
+
+# save current working directory with all subfolders as zip file and serve as download
+@app.callback(
+    [Output('download_link_popup_placeholder1','data'),
+    Output('download_directory_store','data')],
+    [Input('download_directory_button','n_clicks')])
+def downloadDirectory(n_clicks):
+    if n_clicks != None:
+        filename=(str(root.working_directory).rstrip('/'))
+        filename=filename[filename.rfind('/')+1:]
+        shutil.make_archive(str(root.download_directory)+filename, 'zip', str(root.working_directory))
+        return ['open',filename+'.zip']
+    else:
+        raise PreventUpdate
+
+# add all user selected files to a zip file and serve as download
+@app.callback(
+    [Output('download_link_popup_placeholder2','data'),
+    Output('download_file_store','data')],
+    [Input('download_files_button','n_clicks')],
+    [State('download_popup_file_list','value')])
+def downloadFiles(n_clicks,files):
+    if n_clicks != None and files != None:
+        # create zipfile with unique id (based on current time) and add all scan files
+        only_filename='KStat_Download_{}.zip'.format(datetime.now().strftime('%Y_%m_%d_%H-%M-%S'))
+        filename=str(root.download_directory)+only_filename
+        zipObj = ZipFile(filename, 'w')
+        for file in files:
+            file_parameters=file.replace('.csv','')+'-parameters.txt'
+            file_plot=file.replace('.csv','')+'.png'
+            if os.path.exists(file):
+                zipObj.write(file,file[file.rfind('/')+1:])
+            if os.path.exists(file_parameters):
+                zipObj.write(file_parameters,file_parameters[file_parameters.rfind('/')+1:])
+            if os.path.exists(file_plot):
+                zipObj.write(file_plot,file_plot[file_plot.rfind('/')+1:])
+        zipObj.close()
+        return ['open',only_filename]
+    else:
+        raise PreventUpdate
+        
+# since the modal popup is opened by one button and closed by another,
+# two placeholder components are used to control its open state
+@app.callback(
+    [Output('download_link_popup','is_open')],
+    [Input('download_link_popup_placeholder1','data'),
+     Input('download_link_popup_placeholder2','data'),
+     Input('download_link_popup_placeholder3','data')])
+def open_close_download_link_popup(placeholder1,placeholder2,placeholder3):
+    #determining which input was triggered to determine whether to open or close the modal
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
+    else:
+        trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if trigger_id == 'download_link_popup_placeholder1':
+        return [True]
+    if trigger_id == 'download_link_popup_placeholder2':
+        return [True]
+    elif trigger_id == 'download_link_popup_placeholder3':
+        return [False]
+    else:
+        return [False]
 
 # open modal popup for the file download
 @app.callback(
@@ -172,13 +307,17 @@ def directory_and_scan_selection():
     [Input('download_button','n_clicks')])
 def openDownloadPopup(n_clicks):
     if n_clicks != None:
+        print('Open')
         return 'open'
     else:
         raise PreventUpdate
 # since the modal popup is opened by one button and closed by another,
 # two placeholder components are used to control its open state
 @app.callback(
-    [Output('download_popup','is_open')],
+    [Output('download_popup','is_open'),
+    Output('download_popup_directories','options'),
+    Output('download_popup_file_list','options'),
+    Output('download_popup_header','children')],
     [Input('download_popup_placeholder1','data'),
      Input('download_popup_placeholder2','data')])
 def open_close_download_popup(placeholder1,placeholder2):
@@ -190,12 +329,43 @@ def open_close_download_popup(placeholder1,placeholder2):
         trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
         
     if trigger_id == 'download_popup_placeholder1':
-        return [True]
+        root.flush()
+        directory_list = glob('{}*/'.format(root.working_directory))
+        
+        #generate list of subdirectories in current working directory
+        directory_options=[]
+        for directory in directory_list:
+            label = directory.replace(str(root.working_directory),'').strip('/')
+            label = u"\U0001F5C1" + " " + label
+            directory_options.append({'label':label,'value':directory})
+        
+        #generate list of csv files for scan selector
+        file_list = glob('{}*.csv'.format(root.working_directory))
+        file_options = []
+        for file in file_list:
+            label=file.replace(str(root.working_directory),'').replace('.csv','')
+            file_options.append({'label':label,'value':file})
+        
+        label=str(root.working_directory).replace(str(root.main_directory),'').strip('/')
+        
+        return [True, directory_options, file_options, label]
     elif trigger_id == 'download_popup_placeholder2':
-        return [False]
+        return [False,no_update,no_update,no_update]
     else:
-        return [False]
-
+        return [False,no_update,no_update,no_update]
+# slect/deselct all files in directory dialog to delete
+@app.callback(
+    Output('download_popup_file_list','value'),
+    [Input('download_popup_file_list_select_all','value')],
+    [State('download_popup_file_list','options')])
+def selectAllDownloadFiles(value,options):
+    if 'all' in value:
+        new_value=[]
+        for option in options:
+            new_value.append(option['value'])
+        return new_value
+    else:
+        return [None]
 
 # open modal popup for the file upload
 @app.callback(

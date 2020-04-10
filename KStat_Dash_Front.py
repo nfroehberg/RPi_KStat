@@ -25,7 +25,7 @@ from kstat_interface.dash_apps.app import app
 from kstat_interface import redis_config
 from subprocess import call
 import pathlib
-
+import os, shutil
 # to add a component that communicates with the backend:
 #
 # add component plus two dcc.Store components with data=1 and data=2
@@ -51,6 +51,17 @@ def get_program():
     if program == 'startup':
         program = None
     return program
+    
+def clearDirectory(dir):
+    for filename in os.listdir(dir):
+        file_path = os.path.join(dir, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 dark_theme={
     'dark': True,
@@ -149,6 +160,8 @@ if __name__ == '__main__':
             main_directory = str(pathlib.Path(__file__).parent.absolute())
             root.main_directory = main_directory + '/'
             root.data_directory = main_directory + '/data/'
+            root.download_directory = main_directory + '/user_downloads/'
+            clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
             root.working_directory = root.data_directory
 
             app.layout = setup_layout()
