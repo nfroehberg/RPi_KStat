@@ -10,8 +10,9 @@ from time import time,sleep
 from redisworks import Root
 from ast import literal_eval
 import json
-from .app import app, write_config, directory_and_scan_selection
+from .app import app, write_config
 from .. import redis_config
+from .file_management import directory_and_scan_selection
 import pandas as pd
 from glob import glob
 
