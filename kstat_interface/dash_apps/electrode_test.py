@@ -13,6 +13,7 @@ import json
 from .app import app, write_config
 from .. import redis_config
 from .file_management import directory_and_scan_selection
+from .status_components import status_indicator_leds
 import pandas as pd
 from glob import glob
 
@@ -47,35 +48,7 @@ def main():
                 ]
             ),
         
-        html.Div(
-            className='sub_program',
-            children=[
-                html.Div(
-                    className='centered_row',
-                    children=html.H5('Status')
-                    ),
-                html.Div(
-                    className='centered_row',
-                    children=[
-                        html.Label(htmlFor='electrode_test_purge_indicator',children='Purge'),
-                        html.Div(style={'width':'5px'}),
-                        daq.Indicator(id="electrode_test_purge_indicator",size=20),
-                        
-                        html.Div(style={'width':'15px'}),
-                        
-                        html.Label(htmlFor='electrode_test_stirr_indicator',children='Stirring'),
-                        html.Div(style={'width':'5px'}),
-                        daq.Indicator(id="electrode_test_stirr_indicator",size=20),
-                        
-                        html.Div(style={'width':'15px'}),
-                        
-                        html.Label(htmlFor='electrode_test_scan_indicator',children='Scan'),
-                        html.Div(style={'width':'5px'}),
-                        daq.Indicator(id='electrode_test_scan_indicator',size=20)
-                        ]
-                    )
-                ]
-            ),
+        status_indicator_leds(),
         
         html.Div(
             className='sub_program',

@@ -1,0 +1,17 @@
+Differential Pulse Voltammetry Experiment
+Comment =		
+Localtime =		2020-01-20 16:41:24
+UTC =			2020-01-20 15:41:24
+Timestamp =		1579534884.7446787
+Parameters:
+Samplerate =		1KHz
+t_preconditioning1 =	90 s
+t_preconditioning2 =	0 s
+v_preconditioning1 =	-700 mV
+v_preconditioning2 =	-1000 mV
+start =			-800 mV
+stop =			-1150 mV
+step_size =		4 mV
+pulse_height =		50 mV
+period =		300 ms
+width =			40 ms
