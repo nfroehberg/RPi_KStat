@@ -12,8 +12,8 @@ from ast import literal_eval
 import json
 from .app import app, write_config
 from .. import redis_config
-from .file_management import directory_and_scan_selection
 from .status_components import status_indicator_leds
+from .plotting import plot_scan
 import pandas as pd
 from glob import glob
 
@@ -36,17 +36,7 @@ def main():
         ),
         dcc.Store(id='electrode_test_timestamp', data=1),
         
-        html.Div(
-            className='sub_program',
-            children=[
-                dcc.Store(id='electrode_test_graph_file'),
-                dcc.Graph(id='electrode_test_graph'),
-                html.Div(
-                    className='left_row',
-                    children=directory_and_scan_selection()
-                    )
-                ]
-            ),
+        plot_scan(),
         
         status_indicator_leds(),
         
@@ -400,50 +390,6 @@ def main():
                 ]
             )
         ]
-
-@app.callback(
-    Output('electrode_test_graph','figure'),
-    [Input('electrode_test_graph_file','data')])
-def update_graph(file):
-    df=pd.read_csv(file)
-    config = literal_eval(str(root.electrode_test))
-    graph_title = config['start_button_go']['scan_id']
-    figure={
-        'data':[{'x':df.potential,
-                 'y':df.current,
-                 'marker':{'color':'rgb(155,240,255)'}
-                 }
-                ],
-        'layout':{
-            'title':{
-                'text':graph_title,
-                'font':{'color':'white'}},
-            'xaxis':{
-                'title':{
-                    'text':'Potential [mV] vs. Ag/AgCl',
-                    'font':{'color':'white'}},
-                'autorange':'reversed',
-                'gridcolor':'black',
-                'zerolinecolor':'black',
-                'zerolinewidth':2,
-                'tickfont':{'color':'white'}
-                },
-            'yaxis':{
-                'title':{
-                    'text':'Current [A]',
-                    'font':{'color':'white'}},
-                'autorange':'reversed',
-                'gridcolor':'black',
-                'zerolinecolor':'black',
-                'zerolinewidth':2,
-                'tickfont':{'color':'white'}
-                },
-            'paper_bgcolor':'rgba(0,0,0,0)',
-            'plot_bgcolor':'rgba(0,0,0,0)'
-            }
-        }
-    return figure
-
 
 
 # open modal popup for the user to enter a scan id before starting a measurement
