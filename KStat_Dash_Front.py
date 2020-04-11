@@ -1,5 +1,5 @@
 # GUI Frontend for the KStat electrochemical analyzer
-# Main Script
+# Main Script to initialize the interface and main structure of the program
 # using Dash by Plotly (MIT licensed)
 # Nico Fröhberg, 2019
 # nico.froehberg@gmx.de
