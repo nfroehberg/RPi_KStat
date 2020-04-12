@@ -18,10 +18,7 @@ from time import time,sleep
 from redisworks import Root
 from ast import literal_eval
 import json
-import kstat_interface.dash_apps.hg_plater as hg_plater
-import kstat_interface.dash_apps.single_CV as single_CV
-import kstat_interface.dash_apps.single_DPV as single_DPV
-import kstat_interface.dash_apps.electrode_test as electrode_test
+import kstat_interface.dash_apps.measurement as measurement
 from kstat_interface.dash_apps.app import app
 from kstat_interface import redis_config
 from subprocess import call
@@ -74,25 +71,11 @@ def setup_layout():
     return html.Div(
             style = {'height':'100%','width':'100%'},
             children=[
-                html.H1('KStat Control Center',style = {'width':'100%'}),
-                dcc.Dropdown(
-                    id='program_dropdown',
-                    clearable=False,
-                    options=[
-                        {'value':'hg_plater','label':'Hg Electrode Plating'},
-                        {'value':'electrode_test','label':'Electrode Test'},
-                        {'value':'single_CV','label':'Single Measurement - Cyclic Voltammetry'},
-                        {'value':'single_DPV','label':'Single Measurement - Differential Pulse Voltammetry'}
-                        ],
-                    placeholder='Select a program',
-                    value=get_program(),
-                    className='program_dropdown'
-                    ),
                 daq.DarkThemeProvider(
                     theme=dark_theme,
                     children=html.Div(
                         style={'width':'100%','display':'flex','justifyContent':'center','alignItems':'center'},
-                        children=html.Div(id='main_program',className='main_program'))),
+                        children=html.Div(measurement.main()))),
                 html.Footer(
                     style={'position':'fixed','bottom':'0%','left':'0%'},
                     children=daq.DarkThemeProvider(
@@ -113,18 +96,6 @@ def setup_layout():
                                     id='reboot_button')])))
                     ])
 
-# Load Program based on dropdown selection
-programs = {'hg_plater':hg_plater.main(), 'single_CV':single_CV.main(),
-            'single_DPV':single_DPV.main(),'electrode_test':electrode_test.main()}
-@app.callback(
-    Output('main_program','children'),
-    [Input('program_dropdown','value')])
-def setprogram(program):
-    if program != None:
-        root.program = program
-        return programs[program]
-    else:
-        return no_update
 
 # Shut down the RPi
 @app.callback(
@@ -164,6 +135,8 @@ if __name__ == '__main__':
             root.download_directory = main_directory + '/user_downloads/'
             clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
             root.working_directory = root.data_directory
+            root.program='measurement'
+            root.config={'purge_switch':{'on':True,'disabled':False},'stirr_switch':{'on':True,'disabled':False}}
 
             app.layout = setup_layout()
             app.run_server(debug=False, host='10.3.141.1', port=8080)
