@@ -9,11 +9,11 @@ from dash import no_update
 from time import time,sleep
 from redisworks import Root
 from ast import literal_eval
-import json
 from .app import app, write_config
 from .. import redis_config
 from .update_components import update_components
 from .controls import *
+from .inputs import *
 from .plotting import plot_scan
 import pandas as pd
 from glob import glob
@@ -29,30 +29,45 @@ light_theme={
 }
 
 def main():
-    return [
+    return html.Div(
+        className='main_program',
+        children=[
         update_components(),
         
         #plot_scan(),
                 
-        html.Div(
+        html.Div(id='controls',
             className='sub_program',
+            style={'width':'100%'},
             children=[
+                html.H5('Controls'),
                 html.Div(
                     className='centered_row',
                     children=[
                         purge_switch(),
-                        stirr_switch()
+                        stirr_speed_slider(),
+                        stirr_switch(),
                         ]
                     ),
-                html.Div(style={'height':'50px'}),
                 html.Div(
                     className='centered_row',
                     children=[
-                        
+                        scan_progress(),
+                        series_progress(),
                         ]
                     ),
                 ]
             ),
-        
-        ]
+            
+        html.Div(id='scan_settings',
+            className='sub_program',
+            children=[
+                html.H5('Scan Settings'),
+                html.Div(
+                className='centered_row',
+                children=[]
+                )
+            ]
+        )
+    ])
 

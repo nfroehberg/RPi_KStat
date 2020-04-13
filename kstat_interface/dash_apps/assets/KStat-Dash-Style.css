@@ -15,6 +15,7 @@ html {
 	display:flex;
 	justify-content:center;
 	align-items:center;
+    flex-wrap:wrap;
 }
 
 .left_row{
@@ -22,6 +23,7 @@ html {
 	align-items:center;
 	margin:5px;
     vertical-align: middle;
+    flex-wrap:wrap;
 }
   
 .sub_program{
@@ -69,7 +71,8 @@ body {
   line-height: 1.6;
   font-weight: 400;
   font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: rgb(200, 200, 200); }
+  color: rgb(200, 200, 200);
+  background: rgba(0, 0, 0, 0);  }
 
 /* Typography
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -126,3 +129,5 @@ input[type="button"] {
   content: "";
   display: table;
   clear: both; }
+  
+

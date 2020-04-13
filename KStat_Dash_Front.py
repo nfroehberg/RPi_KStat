@@ -67,6 +67,15 @@ dark_theme={
     'primary': '#8be3ff',
     'secondary': '#6E6E6E',
 }
+
+initial_config={
+    'purge_switch':{'on':False,'disabled':False},
+    'stirr_switch':{'on':False,'disabled':False},
+    'scan_progress':{'value':50,'children':''},
+    'series_progress':{'value':70,'children':''},
+    'stirr_speed_slider':{'value':1000},
+    }
+    
 def setup_layout():
     return html.Div(
             style = {'height':'100%','width':'100%'},
@@ -75,7 +84,7 @@ def setup_layout():
                     theme=dark_theme,
                     children=html.Div(
                         style={'width':'100%','display':'flex','justifyContent':'center','alignItems':'center'},
-                        children=html.Div(measurement.main()))),
+                        children=measurement.main())),
                 html.Footer(
                     style={'position':'fixed','bottom':'0%','left':'0%'},
                     children=daq.DarkThemeProvider(
@@ -136,7 +145,7 @@ if __name__ == '__main__':
             clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
             root.working_directory = root.data_directory
             root.program='measurement'
-            root.config={'purge_switch':{'on':True,'disabled':False},'stirr_switch':{'on':True,'disabled':False}}
+            root.config=initial_config
 
             app.layout = setup_layout()
             app.run_server(debug=False, host='10.3.141.1', port=8080)

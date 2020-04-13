@@ -53,12 +53,16 @@ if __name__ == '__main__':
                     if updates_timestamp != updated_timestamp:
                         updated_timestamp = updates_timestamp
                         config = literal_eval(str(root.config))
-                        print(config['purge_switch']['on'])
+                        
                         if config['purge_switch']['on']:
-                            print('on')
                             motor.activate('A')
                         else:
                             motor.deactivate('A')
+                        if config['stirr_switch']['on']:
+                            motor.start('B', config['stirr_speed_slider']['value']/25)
+                        else:
+                            motor.start('B',0)
+                            
                 except Exception as e:
                     print(e)
         except Exception as e:

@@ -20,7 +20,7 @@ from time import time,sleep
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config.suppress_callback_exceptions = True
 
 app.index_string = '''

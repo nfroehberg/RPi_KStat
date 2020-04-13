@@ -18,6 +18,20 @@ from glob import glob
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
 
+# (<component>,<parameter>,<user updatable>)
+update_list=[
+    ('purge_switch','on',True),
+    ('purge_switch','disabled',False),
+    ('stirr_switch','on',True),
+    ('stirr_switch','disabled',False),
+    ('scan_progress','value',False),
+    ('scan_progress','children',False),
+    ('series_progress','value',False),
+    ('series_progress','children',False),
+    ('stirr_speed_slider','value',True),
+    ]
+
+####################################################################
 def update_components():
     return html.Div(
         children=[
@@ -54,13 +68,7 @@ def check_update(n_intervals, stored_stamp):
     else:
         return config_stamp
 
-# (<component>,<parameter>,<user updatable>)
-update_list=[
-    ('purge_switch','on',True),
-    ('purge_switch','disabled',False),
-    ('stirr_switch','on',True),
-    ('stirr_switch','disabled',False),
-    ]
+
 
 # generating lists of parameters for callback function
 update_outputs = []
