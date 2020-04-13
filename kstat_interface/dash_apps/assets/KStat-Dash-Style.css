@@ -37,6 +37,9 @@ html {
 .main_program{
   margin-top:25px;
 }
+.modal-content {
+    background-color: #003663;
+}
 
 @media (orientation: landscape) {
   .program_dropdown{width:30%;}
