@@ -24,12 +24,11 @@ redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
 
 def directory_and_scan_selection():
-    return html.Div(
+    return html.Div(id='file_management',
         className='centered_row',
         children=[
             dcc.Interval(id='directory_and_scan_initialization',disabled=False),
             dcc.Store(id='files_initialization'),
-            dcc.Store(id='scan_selector_placeholder'),
             dcc.Dropdown(id='scan_selector',
                 style={'width':'250px','color':'black'},
                 clearable=False),
@@ -169,11 +168,12 @@ def directory_and_scan_selection():
 
 
 @app.callback(
-    Output('scan_selector_placeholder','data'),
+    Output('voltammogram_graph_file','data'),
     [Input('scan_selector','value')])
 def select_scan(value):
     if value != None:
         root.graph_file=value
+        return value
     raise PreventUpdate
 
 
@@ -196,7 +196,6 @@ def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_fi
         raise PreventUpdate
         
     root.flush()
-    print(root.working_directory)
     directory_list = glob('{}*/'.format(root.working_directory))
 	#don't allow user to go higher than the base data directory
     if root.working_directory != root.data_directory:

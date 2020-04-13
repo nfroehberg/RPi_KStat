@@ -18,7 +18,6 @@ from ast import literal_eval
 import json
 from .app import app, write_config
 from .. import redis_config
-from .file_management import directory_and_scan_selection
 import pandas as pd
 
 redis_host,redis_port = redis_config.get_config()
@@ -26,24 +25,20 @@ root = Root(host=redis_host, port=redis_port, db=0)
 
 def plot_scan():
     return html.Div(
-        className='sub_program',
         children=[
-            dcc.Store(id='electrode_test_graph_file'),
-            dcc.Graph(id='electrode_test_graph'),
-            html.Div(
-                className='left_row',
-                children=directory_and_scan_selection()
-                )
+            dcc.Store(id='voltammogram_graph_file'),
+            dcc.Graph(id='voltammogram_graph'),
             ]
         )
 
 @app.callback(
-    Output('electrode_test_graph','figure'),
-    [Input('electrode_test_graph_file','data')])
+    Output('voltammogram_graph','figure'),
+    [Input('voltammogram_graph_file','data')])
 def update_graph(file):
     df=pd.read_csv(file)
+    root.flush()
     config = literal_eval(str(root.electrode_test))
-    graph_title = config['start_button_go']['scan_id']
+    graph_title = file.replace(str(root.working_directory),'').replace('.csv','')
     figure={
         'data':[{'x':df.potential,
                  'y':df.current,

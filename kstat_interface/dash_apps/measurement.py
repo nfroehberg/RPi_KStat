@@ -34,10 +34,11 @@ def main():
         className='main_program',
         children=[
         update_components(),
-        html.Div(id='file_management',
+        html.Div(id='graph_and_file_management',
             className='sub_program',
             style={'width':'100%'},
             children=[
+                plot_scan(),
                 directory_and_scan_selection()
                 ]
             ),
