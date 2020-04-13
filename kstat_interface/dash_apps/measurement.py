@@ -12,6 +12,7 @@ from ast import literal_eval
 from .app import app, write_config
 from .. import redis_config
 from .update_components import update_components
+from .file_management import directory_and_scan_selection
 from .controls import *
 from .inputs import *
 from .plotting import plot_scan
@@ -33,8 +34,13 @@ def main():
         className='main_program',
         children=[
         update_components(),
-        
-        #plot_scan(),
+        html.Div(id='file_management',
+            className='sub_program',
+            style={'width':'100%'},
+            children=[
+                directory_and_scan_selection()
+                ]
+            ),
                 
         html.Div(id='controls',
             className='sub_program',

@@ -40,7 +40,7 @@ html {
 
 @media (orientation: landscape) {
   .program_dropdown{width:30%;}
-  .main_program{width:60%;}
+  .main_program{width:70%;}
 }
 
 @media (orientation: portrait) {
