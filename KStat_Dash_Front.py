@@ -92,6 +92,8 @@ initial_config={
     'period_input':{'value':300},
     'pulse_width_input':{'value':40},
     'frequency_input':{'value':50},
+    'category_selection':{'value':'voltammetry_single'},
+    'program_selection':{'value':'single_cv'},
     }
     
 def setup_layout():

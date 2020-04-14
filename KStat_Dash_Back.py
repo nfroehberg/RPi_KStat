@@ -44,16 +44,17 @@ if __name__ == '__main__':
             initialize_redis()
             initialize_motor()
             initialize_KStat()
-            # main loop: check for updates on root server and execute commands from front end
             updated_timestamp=str(time())
+            # main loop: check for updates on root server and execute commands from front end
             while True:
                 try:
                     root.flush()
                     updates_timestamp = str(root.update_timestamp)
                     if updates_timestamp != updated_timestamp:
+                        
                         updated_timestamp = updates_timestamp
                         config = literal_eval(str(root.config))
-                        
+                        print(config['purge_time_input']['value'])
                         if config['purge_switch']['on']:
                             motor.activate('A')
                         else:

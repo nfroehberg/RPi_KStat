@@ -69,30 +69,35 @@ def main():
         html.Div(id='scan_settings',
             className='sub_program',
             children=[
-                html.H5('Scan Settings'),
+                html.H5('Settings'),
                 html.Div(
-                className='left_row',
-                children=[
-                    purge_time(),
-                    cleaning_potential(),
-                    cleaning_time(),
-                    deposition_potential(),
-                    deposition_time(),
-                    start_potential(),
-                    vertex_potential(),
-                    end_potential(),
-                    slope(),
-                    pulse_height(),
-                    pulse_width(),
-                    period(),
-                    frequency(),
-                    step_size(),
-                    n_scans(),
-                    samplefreq(),
-                    iv_gain(),
-                    pga_gain(),
-                    ]
-                )
+                    className='centered_row',
+                    children=[
+                        category_selection(),
+                        program_selection()]),
+                html.Div(
+                    className='left_row',
+                    children=[
+                        purge_time(),
+                        cleaning_potential(),
+                        cleaning_time(),
+                        deposition_potential(),
+                        deposition_time(),
+                        start_potential(),
+                        vertex_potential(),
+                        end_potential(),
+                        slope(),
+                        pulse_height(),
+                        pulse_width(),
+                        period(),
+                        frequency(),
+                        step_size(),
+                        n_scans(),
+                        samplefreq(),
+                        iv_gain(),
+                        pga_gain(),
+                        ]
+                    )
             ]
         )
     ])

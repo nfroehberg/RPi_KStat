@@ -47,6 +47,8 @@ update_list=[
     ('period_input','value',True),
     ('pulse_width_input','value',True),
     ('frequency_input','value',True),
+    ('category_selection','value',True),
+    ('program_selection','value',True),
     ]
 
 ####################################################################
