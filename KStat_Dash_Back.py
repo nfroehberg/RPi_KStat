@@ -54,7 +54,6 @@ if __name__ == '__main__':
                         
                         updated_timestamp = updates_timestamp
                         config = literal_eval(str(root.config))
-                        print(config['purge_time_input']['value'])
                         if config['purge_switch']['on']:
                             motor.activate('A')
                         else:

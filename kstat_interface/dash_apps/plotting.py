@@ -24,7 +24,8 @@ redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
 
 def plot_scan():
-    return html.Div(
+    return html.Div(id='voltammogram_graph_container',
+        style={'width':'100%'},
         children=[
             dcc.Store(id='voltammogram_graph_file'),
             dcc.Graph(id='voltammogram_graph'),
@@ -34,7 +35,7 @@ def plot_scan():
 @app.callback(
     Output('voltammogram_graph','figure'),
     [Input('voltammogram_graph_file','data')])
-def update_graph(file):
+def update_plot_scan(file):
     df=pd.read_csv(file)
     root.flush()
     config = literal_eval(str(root.electrode_test))

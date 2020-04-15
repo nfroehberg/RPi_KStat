@@ -80,7 +80,7 @@ def control_stirring(switch, update, update_acknowledged):
 
 def stirr_speed_slider():
     return html.Div(id='stirr_speed_slider_container',
-        style={'width':'50%'},
+        style={'width':'50%','display':'flex','flexWrap':'wrap'},
         children=[
             html.Div(
                 style={'width':'100%'},
@@ -133,82 +133,3 @@ def series_progress():
             html.Div(style={'height':'5px'}),
                 ]
         )
-
-def category_selection():
-    return html.Div(id='category_selection_container',
-        style={'width':'30%'},
-        children=[
-            dcc.Store(id='category_selection_value_update', data=1),
-            dcc.Store(id='category_selection_value_update_acknowledged', data=2),
-            dcc.Dropdown(
-                id='category_selection',
-                style={'color':'black'},
-                clearable=False,
-                options=[
-                    {'label':'Voltammetry - Single Measurement','value':'voltammetry_single'},
-                    {'label':'Voltammetry - Standard Addition','value':'voltammetry_standard_addition'},
-                    {'label':'Hg/Au Electrode Fabrication','value':'hg_au_electrode_fabrication'},
-                    ]
-                ),
-            ]
-        )
-@app.callback(
-    [Output('category_selection_value_update_acknowledged','data'),
-    Output('program_selection','options')],
-    [Input('category_selection','value')],
-    [State('category_selection_value_update','data'),
-     State('category_selection_value_update_acknowledged','data')])
-def update_category(value, update, update_acknowledged):
-    if update == update_acknowledged:
-        
-        write_config([{'component':'category_selection',
-                       'attribute':'value','value':value}])
-                       
-        if value == 'voltammetry_single':
-            options = [
-                {'label':'Cyclic','value':'single_cv'},
-                {'label':'Linear','value':'single_lv'},
-                {'label':'Differential Pulse','value':'single_dpv'},
-                {'label':'Squarewave','value':'single_swv'},]
-        elif value == 'voltammetry_standard_addition':
-            options = [
-                {'label':'Cyclic','value':'standard_addition_cv'},
-                {'label':'Linear','value':'standard_addition_lv'},
-                {'label':'Differential Pulse','value':'standard_addition_dpv'},
-                {'label':'Squarewave','value':'standard_addition_swv'},]
-        elif value == 'hg_au_electrode_fabrication':
-            options = [
-                {'label':'Mercury Plating','value':'hg_au_electrode_plating'},
-                {'label':'Electrode Testing','value':'hg_au_electrode_testing'}]
-        else:
-            options = []
-            
-        return no_update, options
-    else:
-        return update, no_update
-
-def program_selection():
-    return html.Div(id='program_selection_container',
-        style={'width':'30%'},
-        children=[
-            dcc.Store(id='program_selection_value_update', data=1),
-            dcc.Store(id='program_selection_value_update_acknowledged', data=2),
-            dcc.Dropdown(
-                id='program_selection',
-                style={'color':'black'},
-                clearable=False,
-                ),
-            ]
-        )
-@app.callback(
-    Output('program_selection_value_update_acknowledged','data'),
-    [Input('program_selection','value')],
-    [State('program_selection_value_update','data'),
-     State('program_selection_value_update_acknowledged','data')])
-def update_program(value, update, update_acknowledged):
-    if update == update_acknowledged:
-        write_config([{'component':'program_selection',
-                       'attribute':'value','value':value}])
-        raise PreventUpdate
-    else:
-        return update

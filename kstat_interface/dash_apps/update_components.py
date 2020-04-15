@@ -49,6 +49,10 @@ update_list=[
     ('frequency_input','value',True),
     ('category_selection','value',True),
     ('program_selection','value',True),
+    ('plating_time_input','value',True),
+    ('plating_potential_input','value',True),
+    ('comment_input','value',True),
+    ('n_electrode_tests_input','value',True),
     ]
 
 ####################################################################

@@ -18,7 +18,7 @@ from time import time,sleep
 from redisworks import Root
 from ast import literal_eval
 import json
-import kstat_interface.dash_apps.measurement as measurement
+import kstat_interface.dash_apps.main_app as main_app
 from kstat_interface.dash_apps.app import app
 from kstat_interface import redis_config
 from subprocess import call
@@ -94,7 +94,30 @@ initial_config={
     'frequency_input':{'value':50},
     'category_selection':{'value':'voltammetry_single'},
     'program_selection':{'value':'single_cv'},
+    'plating_potential_input':{'value':-100},
+    'plating_time_input':{'value':180},
+    'comment_input':{'value':''},
+    'n_electrode_tests_input':{'value':20},
     }
+
+def initialize_config(root):
+    for component in initial_config.keys():
+        try:
+            root_config_component = root.config[component]
+            for parameter in initial_config[component].keys():
+                try:
+                    root_config_component_parameter = root.config[component][parameter]
+                except:
+                    config=literal_eval(str(root.config))
+                    config[component][parameter] = initial_config[component][parameter]
+                    root.config=config
+                    print('initializing', component, parameter)
+        except:
+            config=literal_eval(str(root.config))
+            config[component]=initial_config[component]
+            root.config=config
+            print('initializing', component)
+    root.flush()
     
 def setup_layout():
     return html.Div(
@@ -104,7 +127,7 @@ def setup_layout():
                     theme=dark_theme,
                     children=html.Div(
                         style={'width':'100%','display':'flex','justifyContent':'center','alignItems':'center'},
-                        children=measurement.main())),
+                        children=main_app.main())),
                 html.Footer(
                     style={'position':'fixed','bottom':'0%','left':'0%'},
                     children=daq.DarkThemeProvider(
@@ -165,7 +188,7 @@ if __name__ == '__main__':
             clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
             root.working_directory = root.data_directory
             root.program='measurement'
-            root.config=initial_config
+            initialize_config(root)
 
             app.layout = setup_layout()
             app.run_server(debug=False, host='10.3.141.1', port=8080)

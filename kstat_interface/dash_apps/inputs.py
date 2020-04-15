@@ -721,3 +721,145 @@ def update_n_scans(value, update, update_acknowledged):
         raise PreventUpdate
     else:
         return update
+        
+def plating_potential():
+    return html.Div(id='plating_potential_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='plating_potential_input',
+                        min=-1999,
+                        max=1999,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='plating_potential_input_value_update', data=1),
+            dcc.Store(id='plating_potential_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='plating_potential_input',
+                       children=['Plating',html.Br(),'Potential [mV]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('plating_potential_input_value_update_acknowledged','data'),
+    [Input('plating_potential_input','value')],
+    [State('plating_potential_input_value_update','data'),
+     State('plating_potential_input_value_update_acknowledged','data')])
+def update_plating_potential(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'plating_potential_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+        
+def plating_time():
+    return html.Div(id='plating_time_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='plating_time_input',
+                        min=0,
+                        max=1200,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='plating_time_input_value_update', data=1),
+            dcc.Store(id='plating_time_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='plating_time_input',
+                       children=['Plating',html.Br(),'Time [s]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('plating_time_input_value_update_acknowledged','data'),
+    [Input('plating_time_input','value')],
+    [State('plating_time_input_value_update','data'),
+     State('plating_time_input_value_update_acknowledged','data')])
+def update_plating_time(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'plating_time_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+   
+def comment():
+    return html.Div(id='comment_input_container',
+        className='centered_row',
+        style={'width':'185px'},
+        children=[
+            dcc.Input(id='comment_input',
+                placeholder='Comment',
+                type='text',
+                style={'backgroundColor':'transparent','color':'rgb(200, 200, 200)','width':'185px'},
+                debounce=True
+                ),
+            dcc.Store(id='comment_input_value_update', data=1),
+            dcc.Store(id='comment_input_value_update_acknowledged', data=2),
+            ]
+        )
+@app.callback(
+    Output('comment_input_value_update_acknowledged','data'),
+    [Input('comment_input','value')],
+    [State('comment_input_value_update','data'),
+     State('comment_input_value_update_acknowledged','data')])
+def update_comment(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'comment_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+
+def n_electrode_tests():
+    return html.Div(id='n_electrode_tests_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='n_electrode_tests_input',
+                        min=0,
+                        max=100,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='n_electrode_tests_input_value_update', data=1),
+            dcc.Store(id='n_electrode_tests_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='n_electrode_tests_input',
+                       children=['Test',html.Br(),'Scans'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('n_electrode_tests_input_value_update_acknowledged','data'),
+    [Input('n_electrode_tests_input','value')],
+    [State('n_electrode_tests_input_value_update','data'),
+     State('n_electrode_tests_input_value_update_acknowledged','data')])
+def update_n_electrode_tests(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'n_electrode_tests_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update

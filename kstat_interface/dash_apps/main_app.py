@@ -15,6 +15,7 @@ from .update_components import update_components
 from .file_management import directory_and_scan_selection
 from .controls import *
 from .inputs import *
+from .program_selection import *
 from .plotting import plot_scan
 import pandas as pd
 from glob import glob
@@ -36,7 +37,7 @@ def main():
         update_components(),
         html.Div(id='graph_and_file_management',
             className='sub_program',
-            style={'width':'100%'},
+            style={'width':'100%','display':'flex','flexWrap':'wrap'},
             children=[
                 plot_scan(),
                 directory_and_scan_selection()
@@ -96,6 +97,10 @@ def main():
                         samplefreq(),
                         iv_gain(),
                         pga_gain(),
+                        plating_time(),
+                        plating_potential(),
+                        comment(),
+                        n_electrode_tests(),
                         ]
                     )
             ]

@@ -54,8 +54,9 @@ def write_config(change_list: list):
         config=literal_eval(str(root.config))
         for element in change_list:
             config[element['component']][element['attribute']] = element['value']
-        root.update_timestamp = time()
         root.config = config
+        root.update_timestamp = time()
+        root.flush()
     except Exception as e:
         print(e)
         print("Couldn't write config, trying again.")
