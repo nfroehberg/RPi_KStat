@@ -1,3 +1,9 @@
+# GUI Frontend for the KStat electrochemical analyzer
+# Control components for purging, stirring and progress bars
+# using Dash by Plotly (MIT licensed)
+# Nico Fröhberg, 2019
+# nico.froehberg@gmx.de
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -82,8 +88,9 @@ def stirr_speed_slider():
     return html.Div(id='stirr_speed_slider_container',
         style={'width':'50%','display':'flex','flexWrap':'wrap'},
         children=[
+            html.Div(style={'width':'100%','height':'30px'}),
             html.Div(
-                style={'width':'100%'},
+                style={'width':'100%','height':'40px'},
                 children=dcc.Slider(
                 id='stirr_speed_slider',
                 min=200,

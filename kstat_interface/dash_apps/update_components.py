@@ -1,3 +1,10 @@
+# GUI Frontend for the KStat electrochemical analyzer
+# Script to provide update component that checks for changes from the backend 
+# to update the interface output
+# using Dash by Plotly (MIT licensed)
+# Nico Fröhberg, 2019
+# nico.froehberg@gmx.de
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -49,10 +56,13 @@ update_list=[
     ('frequency_input','value',True),
     ('category_selection','value',True),
     ('program_selection','value',True),
+    ('program_selection','options',False),
     ('plating_time_input','value',True),
     ('plating_potential_input','value',True),
     ('comment_input','value',True),
     ('n_electrode_tests_input','value',True),
+    ('start_button','disabled',False),
+    ('stop_button','disabled',False),
     ]
 
 ####################################################################

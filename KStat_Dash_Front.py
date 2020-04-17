@@ -93,11 +93,13 @@ initial_config={
     'pulse_width_input':{'value':40},
     'frequency_input':{'value':50},
     'category_selection':{'value':'voltammetry_single'},
-    'program_selection':{'value':'single_cv'},
+    'program_selection':{'value':'single_cv','options':[]},
     'plating_potential_input':{'value':-100},
     'plating_time_input':{'value':180},
     'comment_input':{'value':''},
     'n_electrode_tests_input':{'value':20},
+    'start_button':{'disabled':False},
+    'stop_button':{'disabled':False},
     }
 
 def initialize_config(root):

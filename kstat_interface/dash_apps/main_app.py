@@ -1,3 +1,9 @@
+# GUI Frontend for the KStat electrochemical analyzer
+# main application structure for graph, controls and inputs
+# using Dash by Plotly (MIT licensed)
+# Nico Fröhberg, 2019
+# nico.froehberg@gmx.de
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -16,6 +22,7 @@ from .file_management import directory_and_scan_selection
 from .controls import *
 from .inputs import *
 from .program_selection import *
+from .stopandgo import *
 from .plotting import plot_scan
 import pandas as pd
 from glob import glob
@@ -49,6 +56,13 @@ def main():
             style={'width':'100%'},
             children=[
                 html.H5('Controls'),
+                html.Div(
+                    className='centered_row',
+                    children=[
+                        start(),
+                        stop(),
+                        ]
+                    ),
                 html.Div(
                     className='centered_row',
                     children=[
