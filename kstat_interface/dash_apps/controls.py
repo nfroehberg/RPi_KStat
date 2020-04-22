@@ -50,7 +50,6 @@ def purge_switch():
     [State('purge_switch_on_update','data'),
     State('purge_switch_on_update_acknowledged','data')])
 def control_purging(switch, update, update_acknowledged):
-    print(switch, update, update_acknowledged)
     if update == update_acknowledged:
         write_config([{'component':'purge_switch','attribute':'on','value':switch}])
         root.flush()

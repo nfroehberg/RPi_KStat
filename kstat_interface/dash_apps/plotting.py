@@ -38,7 +38,7 @@ def plot_scan():
 def update_plot_scan(file):
     df=pd.read_csv(file)
     root.flush()
-    config = literal_eval(str(root.electrode_test))
+    config = literal_eval(str(root.config))
     graph_title = file.replace(str(root.working_directory),'').replace('.csv','')
     figure={
         'data':[{'x':df.potential,

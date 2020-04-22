@@ -54,6 +54,7 @@ if __name__ == '__main__':
                         
                         updated_timestamp = updates_timestamp
                         config = literal_eval(str(root.config))
+                        
                         if config['purge_switch']['on']:
                             motor.activate('A')
                         else:
@@ -62,6 +63,14 @@ if __name__ == '__main__':
                             motor.start('B', config['stirr_speed_slider']['value']/25)
                         else:
                             motor.start('B',0)
+                            
+                        if config['start_button']['triggered']:
+                            print('start', config['program_selection']['value'], config['popup_measurement_id']['value'])
+                            write_config([{'component':'start_button','attribute':'triggered','value':False}]) 
+                            
+                        if config['stop_button']['triggered']:
+                            print('stop', config['program_selection']['value'])
+                            write_config([{'component':'stop_button','attribute':'triggered','value':False}])
                             
                 except Exception as e:
                     print(e)

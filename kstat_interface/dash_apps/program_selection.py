@@ -420,7 +420,6 @@ component_lists={
     visibility_states)
 def update_program(value, update, update_acknowledged, first_update, *visibility_controlled_components):
     visibility_controlled_components = list(visibility_controlled_components)
-    print('Program',update, update_acknowledged, value, first_update)
     if update == update_acknowledged:
         write_config([{'component':'program_selection',
                        'attribute':'value','value':value}])
@@ -444,7 +443,6 @@ def update_program(value, update, update_acknowledged, first_update, *visibility
         return output
         
     elif first_update == 1 and value != None:
-        print('First Update')
         write_config([{'component':'program_selection',
                        'attribute':'value','value':value}])
         

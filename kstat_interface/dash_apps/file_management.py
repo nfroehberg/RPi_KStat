@@ -501,7 +501,6 @@ def updateDownloadButton(file,folder):
         label=u"\U00002913" + ' ' + folder
         return[label,'/user_downloads/{}'.format(folder)]
     else:
-        print('Error updating download button')
         raise PreventUpdate
 
 # save current working directory with all subfolders as zip file and serve as download

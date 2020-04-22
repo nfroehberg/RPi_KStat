@@ -98,8 +98,9 @@ initial_config={
     'plating_time_input':{'value':180},
     'comment_input':{'value':''},
     'n_electrode_tests_input':{'value':20},
-    'start_button':{'disabled':False},
-    'stop_button':{'disabled':False},
+    'start_button':{'disabled':False,'triggered':False},
+    'stop_button':{'disabled':True,'triggered':False},
+    'popup_measurement_id':{'value':''},
     }
 
 def initialize_config(root):
@@ -193,7 +194,7 @@ if __name__ == '__main__':
             initialize_config(root)
 
             app.layout = setup_layout()
-            app.run_server(debug=False, host='10.3.141.1', port=8080)
+            app.run_server(debug=False, host='voltammetrypi.local', port=8080)
         except Exception as e:
             print(e)
             sleep(1)
