@@ -71,8 +71,10 @@ dark_theme={
 initial_config={
     'purge_switch':{'on':False,'disabled':False},
     'stirr_switch':{'on':False,'disabled':False},
-    'scan_progress':{'value':50,'children':''},
-    'series_progress':{'value':70,'children':''},
+    'scan_progress':{'value':0},
+    'scan_progress_label':{'children':''},
+    'series_progress':{'value':70},
+    'series_progress_label':{'children':''},
     'stirr_speed_slider':{'value':1000},
     'cleaning_potential_input':{'value':-900},
     'deposition_potential_input':{'value':-100},

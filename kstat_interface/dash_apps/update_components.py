@@ -32,9 +32,9 @@ update_list=[
     ('stirr_switch','on',True),
     ('stirr_switch','disabled',False),
     ('scan_progress','value',False),
-    ('scan_progress','children',False),
+    ('scan_progress_label','children',False),
     ('series_progress','value',False),
-    ('series_progress','children',False),
+    ('series_progress_label','children',False),
     ('stirr_speed_slider','value',True),
     ('cleaning_potential_input','value',True),
     ('deposition_potential_input','value',True),
@@ -71,7 +71,7 @@ def update_components():
         children=[
             dcc.Interval(
                 id='update_interval',
-                interval=250, # in milliseconds
+                interval=100, # in milliseconds
                 n_intervals=0
             ),
             dcc.Store(id='update_timestamp', data=1)

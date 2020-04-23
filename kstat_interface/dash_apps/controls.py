@@ -125,7 +125,8 @@ def scan_progress():
             html.Div(style={'height':'5px'}),
             dbc.Progress(id='scan_progress',
                 color="info",
-                style={'width':'100%','height':'10px'}),
+                style={'width':'100%','height':'25px'},
+                children=html.Div(id='scan_progress_label',className='progress_label')),
             html.Div(style={'height':'5px'}),
                 ]
         )
@@ -135,7 +136,8 @@ def series_progress():
         children=[
             html.Div(style={'height':'5px'}),
             dbc.Progress(id='series_progress',
-                style={'width':'100%','height':'10px'}),
+                style={'width':'100%','height':'25px'},
+                children=html.Div(id='series_progress_label',className='progress_label')),
             html.Div(style={'height':'5px'}),
                 ]
         )

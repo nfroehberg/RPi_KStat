@@ -51,9 +51,14 @@ html {
   .main_program{width:90%;}
 }
 
-
-
-
+.progress_label {
+    position:absolute;
+    right:0;
+    left:0;
+    color: black;
+    text-align: center;
+    font-size:large;
+}
 
 
 /* Base Styles

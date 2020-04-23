@@ -68,9 +68,7 @@ def start():
 def startMeasurement(n_clicks,id2):
     if n_clicks != None and id2 != None and id2 != '':
         write_config([{'component':'start_button','attribute':'triggered','value':True},
-                        {'component':'popup_measurement_id','attribute':'value','value':id2},
-                        {'component':'stop_button','attribute':'disabled','value':False},
-                        {'component':'start_button','attribute':'disabled','value':True}])
+                        {'component':'popup_measurement_id','attribute':'value','value':id2},])
         return 'close'
     else:
         raise PreventUpdate

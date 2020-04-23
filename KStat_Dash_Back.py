@@ -7,8 +7,10 @@ from multiprocessing import Process
 from redisworks import Root
 from ast import literal_eval
 from kstat_interface.dash_apps.app import write_config
+from kstat_interface.backend_apps.hg_au_electrode_plating import hg_au_electrode_plating
 from kstat_interface import redis_config
 import RPi.GPIO as GPIO
+from multiprocessing import Process
 
 # Serial address of KStat at specific USB port
 KStat_path = '/dev/serial/by-path/platform-3f980000.usb-usb-0:1.3:1.0'
@@ -66,7 +68,13 @@ if __name__ == '__main__':
                             
                         if config['start_button']['triggered']:
                             print('start', config['program_selection']['value'], config['popup_measurement_id']['value'])
-                            write_config([{'component':'start_button','attribute':'triggered','value':False}]) 
+                            write_config([{'component':'start_button','attribute':'triggered','value':False},
+                                            {'component':'stop_button','attribute':'disabled','value':False},
+                                            {'component':'start_button','attribute':'disabled','value':True}])
+                            if config['program_selection']['value'] == 'hg_au_electrode_plating':
+                                measurement_config=config
+                                measurement = Process(target=hg_au_electrode_plating,args=(measurement_config,motor,ser))
+                            measurement.start()
                             
                         if config['stop_button']['triggered']:
                             print('stop', config['program_selection']['value'])
