@@ -29,6 +29,7 @@ def directory_and_scan_selection():
         children=[
             dcc.Interval(id='directory_and_scan_initialization',disabled=False),
             dcc.Store(id='files_initialization'),
+            dcc.Store(id='graph_file'),
             dcc.Dropdown(id='scan_selector',
                 style={'width':'250px','color':'black'},
                 clearable=False),
@@ -188,13 +189,15 @@ def select_scan(value):
     Input('files_initialization','data'),
     Input('new_directory_update','data'),
     Input('delete_files_update','data'),
-    Input('delete_directory_update','data')],
+    Input('delete_directory_update','data'),
+    Input('graph_file','data')],
     [State('scan_selector','value')])
-def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_files,delete_directory,selected_scan):
+def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_files,delete_directory,graph_file,selected_scan):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
-        
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
     root.flush()
     directory_list = glob('{}*/'.format(root.working_directory))
 	#don't allow user to go higher than the base data directory
@@ -221,6 +224,8 @@ def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_fi
     if selected_scan == None:
         selected_scan = file_options[0]['value']
     
+    if trigger_id == 'graph_file':
+        selected_scan = graph_file+'.csv'
     return[file_options, selected_scan, directory_options, file_options, label]
 
 # reload list of files on page reload

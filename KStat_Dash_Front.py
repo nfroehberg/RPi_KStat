@@ -103,6 +103,7 @@ initial_config={
     'start_button':{'disabled':False,'triggered':False},
     'stop_button':{'disabled':True,'triggered':False},
     'popup_measurement_id':{'value':''},
+    'graph_file':{'data':''},
     }
 
 def initialize_config(root):

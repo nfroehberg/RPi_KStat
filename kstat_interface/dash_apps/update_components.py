@@ -63,6 +63,7 @@ update_list=[
     ('n_electrode_tests_input','value',True),
     ('start_button','disabled',False),
     ('stop_button','disabled',False),
+    ('graph_file','data',False),
     ]
 
 ####################################################################
