@@ -4,7 +4,7 @@
 # nico.froehberg@gmx.de
 
 from time import time, sleep
-from ..dash_apps.app import write_config
+from ..dash_apps.app import write_config, make_scan_progress
 from .drivers import KStat_0_1_driver as KStat
 from serial import Serial
 from sched import scheduler
@@ -24,6 +24,9 @@ def hg_au_electrode_plating(config, motor, ser):
                     {'component':'purge_switch','attribute':'disabled','value':True},
                     {'component':'stirr_switch','attribute':'on','value':True},
                     {'component':'stirr_switch','attribute':'disabled','value':True},
+                    {'component':'upload_button','attribute':'disabled','value':True},
+                    {'component':'download_button','attribute':'disabled','value':True},
+                    {'component':'change_directory_button','attribute':'disabled','value':True},
                     {'component':'scan_progress','attribute':'value','value':0}])
                     
     plating_time=config['plating_time_input']['value']
@@ -38,7 +41,7 @@ def hg_au_electrode_plating(config, motor, ser):
     s_plate.enter(plating_time,2,KStat.idle,(ser,0))
     s_plate.enter(plating_time,3,write_config,([{'component':'scan_progress_label','attribute':'children','value':''}],))
     for i in range(plating_time*4+1):
-        s_plate.enter(i/4,1,make_progress,(i,plating_time*4)) # progress bar
+        s_plate.enter(i/4,1,make_scan_progress,(i,plating_time*4)) # progress bar
     s_plate.run()  
     
     write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},
@@ -46,9 +49,7 @@ def hg_au_electrode_plating(config, motor, ser):
                     {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
                     {'component':'stirr_switch','attribute':'disabled','value':False},
                     {'component':'start_button','attribute':'disabled','value':False},
+                    {'component':'start_button','attribute':'disabled','value':False},
+                    {'component':'upload_button','attribute':'disabled','value':False},
+                    {'component':'download_button','attribute':'disabled','value':False},
                     {'component':'stop_button','attribute':'disabled','value':True}])
-
-
-def make_progress(t,max_t):
-    prog = (t/max_t)*100
-    write_config([{'component':'scan_progress','attribute':'value','value':prog}])

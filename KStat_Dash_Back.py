@@ -8,6 +8,7 @@ from redisworks import Root
 from ast import literal_eval
 from kstat_interface.dash_apps.app import write_config
 from kstat_interface.backend_apps.hg_au_electrode_plating import hg_au_electrode_plating
+from kstat_interface.backend_apps.hg_au_electrode_testing import hg_au_electrode_testing
 from kstat_interface.backend_apps.single_cv import single_cv
 from kstat_interface import redis_config
 import RPi.GPIO as GPIO
@@ -84,10 +85,14 @@ if __name__ == '__main__':
                                             {'component':'start_button','attribute':'disabled','value':True}])
                             measurement_config=config 
                             
+                            # find which program was selected and execute the corresponding script
                             if config['program_selection']['value'] == 'hg_au_electrode_plating':
                                 measurement = Process(target=hg_au_electrode_plating,args=(measurement_config,motor,ser))
                             elif config['program_selection']['value'] == 'single_cv':
                                 measurement = Process(target=single_cv,args=(measurement_config,motor,ser))
+                            elif config['program_selection']['value'] == 'hg_au_electrode_testing':
+                                measurement = Process(target=hg_au_electrode_testing,args=(measurement_config,motor,ser))
+                                
                             measurement.start()
                             
                         if config['stop_button']['triggered']:

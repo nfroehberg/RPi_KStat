@@ -63,4 +63,7 @@ def write_config(change_list: list):
         sleep(1)
         return write_config(change_list)
 
-
+# functions for updating progress bar
+def make_scan_progress(t,max_t):
+    prog = (t/max_t)*100
+    write_config([{'component':'scan_progress','attribute':'value','value':prog}])

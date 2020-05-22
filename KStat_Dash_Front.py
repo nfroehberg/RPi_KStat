@@ -104,6 +104,9 @@ initial_config={
     'stop_button':{'disabled':True,'triggered':False},
     'popup_measurement_id':{'value':''},
     'graph_file':{'data':''},
+    'upload_button':{'disabled':False},
+    'download_button':{'disabled':False},
+    'change_directory_button':{'disabled':False},
     }
 
 def initialize_config(root):

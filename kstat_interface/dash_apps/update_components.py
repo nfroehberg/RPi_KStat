@@ -64,6 +64,9 @@ update_list=[
     ('start_button','disabled',False),
     ('stop_button','disabled',False),
     ('graph_file','data',False),
+    ('change_directory_button','disabled',False),
+    ('upload_button','disabled',False),
+    ('download_button','disabled',False),
     ]
 
 ####################################################################
