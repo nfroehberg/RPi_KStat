@@ -1,5 +1,5 @@
 # GUI Frontend for the KStat electrochemical analyzer
-# Main Script
+# Main Script to initialize the interface and main structure of the program
 # using Dash by Plotly (MIT licensed)
 # Nico Fröhberg, 2019
 # nico.froehberg@gmx.de
@@ -18,10 +18,7 @@ from time import time,sleep
 from redisworks import Root
 from ast import literal_eval
 import json
-import kstat_interface.dash_apps.hg_plater as hg_plater
-import kstat_interface.dash_apps.single_CV as single_CV
-import kstat_interface.dash_apps.single_DPV as single_DPV
-import kstat_interface.dash_apps.electrode_test as electrode_test
+import kstat_interface.dash_apps.main_app as main_app
 from kstat_interface.dash_apps.app import app
 from kstat_interface import redis_config
 from subprocess import call
@@ -70,29 +67,76 @@ dark_theme={
     'primary': '#8be3ff',
     'secondary': '#6E6E6E',
 }
+
+initial_config={
+    'purge_switch':{'on':False,'disabled':False},
+    'stirr_switch':{'on':False,'disabled':False},
+    'scan_progress':{'value':0},
+    'scan_progress_label':{'children':''},
+    'series_progress':{'value':70},
+    'series_progress_label':{'children':''},
+    'stirr_speed_slider':{'value':1000},
+    'cleaning_potential_input':{'value':-900},
+    'deposition_potential_input':{'value':-100},
+    'cleaning_time_input':{'value':5},
+    'deposition_time_input':{'value':2},
+    'purge_time_input':{'value':60},
+    'start_potential_input':{'value':-100},
+    'vertex_potential_input':{'value':-1850},
+    'end_potential_input':{'value':-100},
+    'slope_input':{'value':500},
+    'pulse_height_input':{'value':50},
+    'samplefreq_input':{'value':'1KHz'},
+    'iv_gain_input':{'value':'POT_GAIN_300K'},
+    'pga_gain_input':{'value':2},
+    'n_scans_input':{'value':1},
+    'step_size_input':{'value':4},
+    'period_input':{'value':300},
+    'pulse_width_input':{'value':40},
+    'frequency_input':{'value':50},
+    'category_selection':{'value':'voltammetry_single'},
+    'program_selection':{'value':'single_cv','options':[]},
+    'plating_potential_input':{'value':-100},
+    'plating_time_input':{'value':180},
+    'comment_input':{'value':''},
+    'n_electrode_tests_input':{'value':20},
+    'start_button':{'disabled':False,'triggered':False},
+    'stop_button':{'disabled':True,'triggered':False},
+    'popup_measurement_id':{'value':''},
+    'graph_file':{'data':''},
+    'upload_button':{'disabled':False},
+    'download_button':{'disabled':False},
+    'change_directory_button':{'disabled':False},
+    }
+
+def initialize_config(root):
+    for component in initial_config.keys():
+        try:
+            root_config_component = root.config[component]
+            for parameter in initial_config[component].keys():
+                try:
+                    root_config_component_parameter = root.config[component][parameter]
+                except:
+                    config=literal_eval(str(root.config))
+                    config[component][parameter] = initial_config[component][parameter]
+                    root.config=config
+                    print('initializing', component, parameter)
+        except:
+            config=literal_eval(str(root.config))
+            config[component]=initial_config[component]
+            root.config=config
+            print('initializing', component)
+    root.flush()
+    
 def setup_layout():
     return html.Div(
             style = {'height':'100%','width':'100%'},
             children=[
-                html.H1('KStat Control Center',style = {'width':'100%'}),
-                dcc.Dropdown(
-                    id='program_dropdown',
-                    clearable=False,
-                    options=[
-                        {'value':'hg_plater','label':'Hg Electrode Plating'},
-                        {'value':'electrode_test','label':'Electrode Test'},
-                        {'value':'single_CV','label':'Single Measurement - Cyclic Voltammetry'},
-                        {'value':'single_DPV','label':'Single Measurement - Differential Pulse Voltammetry'}
-                        ],
-                    placeholder='Select a program',
-                    value=get_program(),
-                    className='program_dropdown'
-                    ),
                 daq.DarkThemeProvider(
                     theme=dark_theme,
                     children=html.Div(
                         style={'width':'100%','display':'flex','justifyContent':'center','alignItems':'center'},
-                        children=html.Div(id='main_program',className='main_program'))),
+                        children=main_app.main())),
                 html.Footer(
                     style={'position':'fixed','bottom':'0%','left':'0%'},
                     children=daq.DarkThemeProvider(
@@ -113,18 +157,6 @@ def setup_layout():
                                     id='reboot_button')])))
                     ])
 
-# Load Program based on dropdown selection
-programs = {'hg_plater':hg_plater.main(), 'single_CV':single_CV.main(),
-            'single_DPV':single_DPV.main(),'electrode_test':electrode_test.main()}
-@app.callback(
-    Output('main_program','children'),
-    [Input('program_dropdown','value')])
-def setprogram(program):
-    if program != None:
-        root.program = program
-        return programs[program]
-    else:
-        return no_update
 
 # Shut down the RPi
 @app.callback(
@@ -164,9 +196,11 @@ if __name__ == '__main__':
             root.download_directory = main_directory + '/user_downloads/'
             clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
             root.working_directory = root.data_directory
+            root.program='measurement'
+            initialize_config(root)
 
             app.layout = setup_layout()
-            app.run_server(debug=False, host='10.3.141.1', port=8080)
+            app.run_server(debug=False, host='voltammetrypi.local', port=8080)
         except Exception as e:
             print(e)
             sleep(1)

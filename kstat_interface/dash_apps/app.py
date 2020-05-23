@@ -15,12 +15,12 @@ from dash import no_update
 from glob import glob
 from redisworks import Root
 from .. import redis_config
-from time import time
+from time import time,sleep
 
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.config.suppress_callback_exceptions = True
 
 app.index_string = '''
@@ -47,20 +47,37 @@ app.index_string = '''
 # pass arguments as list of changes where every change is a dictionary
 # {'component','attribute','value'}
 from ast import literal_eval
-import json
 
 def write_config(change_list: list):
     try:
         root.flush()
-        program = str(root.program)
-        config = literal_eval(str(root[program]))
+        config=literal_eval(str(root.config))
         for element in change_list:
             config[element['component']][element['attribute']] = element['value']
-        root[program] = config
-        root[program+'_timestamp'] = time()
+        root.config = config
+        root.update_timestamp = time()
+        root.flush()
     except Exception as e:
         print(e)
         print("Couldn't write config, trying again.")
+        sleep(1)
         return write_config(change_list)
 
+# function for updating progress bar
+def make_scan_progress(t,max_t):
+    prog = (t/max_t)*100
+    write_config([{'component':'scan_progress','attribute':'value','value':prog}])
 
+# disable buttons for purging/stirring & file management during measurements
+def controls_disabled(off):
+    if off:
+        on = False
+    else:
+        on = True
+    write_config([{'component':'purge_switch','attribute':'disabled','value':off},
+                  {'component':'stirr_switch','attribute':'disabled','value':off},
+                  {'component':'upload_button','attribute':'disabled','value':off},
+                  {'component':'download_button','attribute':'disabled','value':off},
+                  {'component':'start_button','attribute':'disabled','value':off},
+                  {'component':'stop_button','attribute':'disabled','value':on},
+                  {'component':'change_directory_button','attribute':'disabled','value':off},])

@@ -15,6 +15,7 @@ html {
 	display:flex;
 	justify-content:center;
 	align-items:center;
+    flex-wrap:wrap;
 }
 
 .left_row{
@@ -22,6 +23,7 @@ html {
 	align-items:center;
 	margin:5px;
     vertical-align: middle;
+    flex-wrap:wrap;
 }
   
 .sub_program{
@@ -35,10 +37,13 @@ html {
 .main_program{
   margin-top:25px;
 }
+.modal-content {
+    background-color: #003663;
+}
 
 @media (orientation: landscape) {
   .program_dropdown{width:30%;}
-  .main_program{width:60%;}
+  .main_program{width:70%;}
 }
 
 @media (orientation: portrait) {
@@ -46,9 +51,14 @@ html {
   .main_program{width:90%;}
 }
 
-
-
-
+.progress_label {
+    position:absolute;
+    right:0;
+    left:0;
+    color: black;
+    text-align: center;
+    font-size:large;
+}
 
 
 /* Base Styles
@@ -69,7 +79,8 @@ body {
   line-height: 1.6;
   font-weight: 400;
   font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: rgb(200, 200, 200); }
+  color: rgb(200, 200, 200);
+  background: rgba(0, 0, 0, 0);  }
 
 /* Typography
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -126,3 +137,5 @@ input[type="button"] {
   content: "";
   display: table;
   clear: both; }
+  
+

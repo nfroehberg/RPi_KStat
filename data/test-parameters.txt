@@ -1,0 +1,14 @@
+Linear Sweep Voltammetry Experiment
+Comment =		Hello
+Localtime =		2020-05-23 21:49:49
+UTC =			2020-05-23 19:49:49
+Timestamp =		1590263389.553547
+Parameters:
+Samplerate =		1KHz
+t_preconditioning1 =	3 s
+t_preconditioning2 =	3 s
+v_preconditioning1 =	-20 mV
+v_preconditioning2 =	-100 mV
+start =			-100 mV
+stop =			-200 mV
+slope =			10 mV/s
