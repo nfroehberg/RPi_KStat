@@ -4,7 +4,7 @@
 # nico.froehberg@gmx.de
 
 from time import time, sleep
-from ..dash_apps.app import write_config, make_scan_progress
+from ..dash_apps.app import write_config, make_scan_progress, controls_disabled
 from .drivers import KStat_0_1_driver as KStat
 from serial import Serial
 from sched import scheduler
@@ -20,30 +20,19 @@ root = Root(host=redis_host, port=redis_port, db=0)
 
 def single_cv(config, motor, ser):
     # disable controls
-    write_config([{'component':'purge_switch','attribute':'disabled','value':True},
-                  {'component':'stirr_switch','attribute':'disabled','value':True},
-                  {'component':'upload_button','attribute':'disabled','value':True},
-                  {'component':'download_button','attribute':'disabled','value':True},
-                  {'component':'change_directory_button','attribute':'disabled','value':True},
-                  {'component':'scan_progress','attribute':'value','value':0}])
+    controls_disabled(True)
+    write_config([{'component':'scan_progress','attribute':'value','value':0}])
     
-    id=config['popup_measurement_id']['value']
+    id = config['popup_measurement_id']['value']
     file = root.working_directory + id
     
     cv_measurement(config, motor, ser, file)
     
     KStat.idle(ser,0)
     
-    write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},
-                    {'component':'purge_switch','attribute':'disabled','value':False},
-                    {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
-                    {'component':'stirr_switch','attribute':'disabled','value':False},
-                    {'component':'start_button','attribute':'disabled','value':False},
-                    {'component':'start_button','attribute':'disabled','value':False},
-                    {'component':'upload_button','attribute':'disabled','value':False},
-                    {'component':'download_button','attribute':'disabled','value':False},
-                    {'component':'stop_button','attribute':'disabled','value':True},
+    write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},                    {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
                     {'component':'graph_file','attribute':'data','value':file}])
+    controls_disabled(False)
 
 def cv_measurement(config, motor, ser, file):
     # Stirr/Purge Controls, Progress Bar updates etc. need to run in separate thread so they can be executed in parallel to the KStat measurement

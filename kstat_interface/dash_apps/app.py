@@ -63,7 +63,21 @@ def write_config(change_list: list):
         sleep(1)
         return write_config(change_list)
 
-# functions for updating progress bar
+# function for updating progress bar
 def make_scan_progress(t,max_t):
     prog = (t/max_t)*100
     write_config([{'component':'scan_progress','attribute':'value','value':prog}])
+
+# disable buttons for purging/stirring & file management during measurements
+def controls_disabled(off):
+    if off:
+        on = False
+    else:
+        on = True
+    write_config([{'component':'purge_switch','attribute':'disabled','value':off},
+                  {'component':'stirr_switch','attribute':'disabled','value':off},
+                  {'component':'upload_button','attribute':'disabled','value':off},
+                  {'component':'download_button','attribute':'disabled','value':off},
+                  {'component':'start_button','attribute':'disabled','value':off},
+                  {'component':'stop_button','attribute':'disabled','value':on},
+                  {'component':'change_directory_button','attribute':'disabled','value':off},])

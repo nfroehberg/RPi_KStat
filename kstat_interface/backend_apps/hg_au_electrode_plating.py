@@ -4,7 +4,7 @@
 # nico.froehberg@gmx.de
 
 from time import time, sleep
-from ..dash_apps.app import write_config, make_scan_progress
+from ..dash_apps.app import write_config, make_scan_progress, controls_disabled
 from .drivers import KStat_0_1_driver as KStat
 from serial import Serial
 from sched import scheduler
@@ -20,14 +20,10 @@ root = Root(host=redis_host, port=redis_port, db=0)
 
 s_plate = scheduler(time,sleep)
 def hg_au_electrode_plating(config, motor, ser):
+    controls_disabled(True)
     write_config([{'component':'purge_switch','attribute':'on','value':False},
-                    {'component':'purge_switch','attribute':'disabled','value':True},
-                    {'component':'stirr_switch','attribute':'on','value':True},
-                    {'component':'stirr_switch','attribute':'disabled','value':True},
-                    {'component':'upload_button','attribute':'disabled','value':True},
-                    {'component':'download_button','attribute':'disabled','value':True},
-                    {'component':'change_directory_button','attribute':'disabled','value':True},
-                    {'component':'scan_progress','attribute':'value','value':0}])
+                  {'component':'stirr_switch','attribute':'on','value':True},
+                  {'component':'scan_progress','attribute':'value','value':0}])
                     
     plating_time=config['plating_time_input']['value']
     plating_potential=config['plating_potential_input']['value']
@@ -45,11 +41,5 @@ def hg_au_electrode_plating(config, motor, ser):
     s_plate.run()  
     
     write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},
-                    {'component':'purge_switch','attribute':'disabled','value':False},
-                    {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
-                    {'component':'stirr_switch','attribute':'disabled','value':False},
-                    {'component':'start_button','attribute':'disabled','value':False},
-                    {'component':'start_button','attribute':'disabled','value':False},
-                    {'component':'upload_button','attribute':'disabled','value':False},
-                    {'component':'download_button','attribute':'disabled','value':False},
-                    {'component':'stop_button','attribute':'disabled','value':True}])
+                    {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},])
+    controls_disabled(False)
