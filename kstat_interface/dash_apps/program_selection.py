@@ -92,7 +92,7 @@ single_cv_components = [
     'stop_button_container',
     ]
     
-single_lv_components = [
+single_lsv_components = [
     'cleaning_potential_input_container',
     'deposition_potential_input_container',
     'cleaning_time_input_container',
@@ -104,7 +104,6 @@ single_lv_components = [
     'samplefreq_input_container',
     'iv_gain_input_container',
     'pga_gain_input_container',
-    'n_scans_input_container',
     'graph_and_file_management',
     'voltammogram_graph_container',
     'purge_switch_container',
@@ -198,7 +197,7 @@ standard_addition_cv_components = [
     'stop_button_container',
     ]
     
-standard_addition_lv_components = [
+standard_addition_lsv_components = [
     'cleaning_potential_input_container',
     'deposition_potential_input_container',
     'cleaning_time_input_container',
@@ -350,13 +349,13 @@ def update_category(value, update, update_acknowledged):
         if value == 'voltammetry_single':
             options = [
                 {'label':'Cyclic','value':'single_cv'},
-                {'label':'Linear','value':'single_lv'},
+                {'label':'Linear Sweep','value':'single_lsv'},
                 {'label':'Differential Pulse','value':'single_dpv'},
                 {'label':'Squarewave','value':'single_swv'},]
         elif value == 'voltammetry_standard_addition':
             options = [
                 {'label':'Cyclic','value':'standard_addition_cv'},
-                {'label':'Linear','value':'standard_addition_lv'},
+                {'label':'Linear Sweep','value':'standard_addition_lsv'},
                 {'label':'Differential Pulse','value':'standard_addition_dpv'},
                 {'label':'Squarewave','value':'standard_addition_swv'},]
         elif value == 'hg_au_electrode_fabrication':
@@ -403,11 +402,11 @@ visibility_controlled_components_labels=visibility_controlled_components
 
 component_lists={
     'single_cv':single_cv_components,
-    'single_lv':single_lv_components,
+    'single_lsv':single_lsv_components,
     'single_dpv':single_dpv_components,
     'single_swv':single_swv_components,
     'standard_addition_cv':standard_addition_cv_components,
-    'standard_addition_lv':standard_addition_lv_components,
+    'standard_addition_lsv':standard_addition_lsv_components,
     'standard_addition_dpv':standard_addition_dpv_components,
     'standard_addition_swv':standard_addition_swv_components,
     'hg_au_electrode_plating':hg_au_electrode_plating_components,
