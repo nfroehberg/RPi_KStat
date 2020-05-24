@@ -25,6 +25,7 @@ def single_cv(config, motor, ser):
     
     id = config['popup_measurement_id']['value']
     file = root.working_directory + id
+    print(file)
     
     cv_measurement(config, motor, ser, file)
     

@@ -60,6 +60,12 @@ html {
     font-size:large;
 }
 
+.scan_parameter_button{
+    width:250px;
+    font-size:xx-small;
+    border: 1px solid #bbb;
+    line-height: 20px;
+}
 
 /* Base Styles
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

@@ -24,6 +24,7 @@ from .inputs import *
 from .program_selection import *
 from .stopandgo import *
 from .plotting import plot_scan
+from .scan_parameters import scan_parameters
 import pandas as pd
 from glob import glob
 
@@ -47,6 +48,7 @@ def main():
             style={'width':'100%','display':'flex','flexWrap':'wrap'},
             children=[
                 plot_scan(),
+                scan_parameters(),
                 directory_and_scan_selection()
                 ]
             ),
