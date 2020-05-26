@@ -107,6 +107,8 @@ initial_config={
     'upload_button':{'disabled':False},
     'download_button':{'disabled':False},
     'change_directory_button':{'disabled':False},
+    'noise_filter_button':{'children':'Noise Filter On'},
+    'noise_frequency_input':{'value':50},
     }
 
 def initialize_config(root):

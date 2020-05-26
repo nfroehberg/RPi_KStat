@@ -67,6 +67,8 @@ update_list=[
     ('change_directory_button','disabled',False),
     ('upload_button','disabled',False),
     ('download_button','disabled',False),
+    ('noise_filter_button','children',False),
+    ('noise_frequency_input','value',True),
     ]
 
 ####################################################################
