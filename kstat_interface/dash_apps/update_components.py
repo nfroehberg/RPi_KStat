@@ -69,6 +69,12 @@ update_list=[
     ('download_button','disabled',False),
     ('noise_filter_button','children',False),
     ('noise_frequency_input','value',True),
+    ('peak_detection_switch','on',True),
+    ('baseline_switch','on',True),
+    ('peak_threshold_input','value',True),
+    ('peak_threshold_range','value',True),
+    ('peak_distance_input','value',True),
+    ('baseline_polynomial_input','value',True),
     ]
 
 ####################################################################

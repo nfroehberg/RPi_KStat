@@ -109,6 +109,12 @@ initial_config={
     'change_directory_button':{'disabled':False},
     'noise_filter_button':{'children':'Noise Filter On'},
     'noise_frequency_input':{'value':50},
+    'peak_detection_switch':{'on':False},
+    'baseline_switch':{'on':False},
+    'peak_threshold_input':{'value':300},
+    'peak_threshold_range':{'value':1000000000000},
+    'peak_distance_input':{'value':100},
+    'baseline_polynomial_input':{'value':4},
     }
 
 def initialize_config(root):

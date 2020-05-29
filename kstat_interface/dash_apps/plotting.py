@@ -19,7 +19,9 @@ import json
 from .app import app, write_config
 from .. import redis_config
 from scipy import signal
+from numpy import mean
 import pandas as pd
+import peakutils as pu
 
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
@@ -31,6 +33,7 @@ def plot_scan():
             dcc.Store(id='voltammogram_graph_file'),
             dcc.Store(id='voltammogram_graph_file2'),
             dcc.Store(id='voltammogram_graph_file3'),
+            dcc.Store(id='voltammogram_graph_file4'),
             dcc.Graph(id='voltammogram_graph'),
             ]
         )
@@ -50,8 +53,9 @@ def generate_param_components(params):
      Output('noise_filter_container','style')],
     [Input('voltammogram_graph_file','data'),
      Input('voltammogram_graph_file2','data'),
-     Input('voltammogram_graph_file3','data')])
-def update_plot_scan(file,file2,file3):
+     Input('voltammogram_graph_file3','data'),
+     Input('voltammogram_graph_file4','data')])
+def update_plot_scan(file,file2,file3,file4):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
@@ -61,6 +65,8 @@ def update_plot_scan(file,file2,file3):
         file = file2
     elif trigger_id == 'voltammogram_graph_file3': # triggered by noise frequency update
         file = file3
+    elif trigger_id == 'voltammogram_graph_file4': # triggered by peak detection update
+        file = file4
     
     params = get_parameters(file)
     collapse_params = generate_param_components(params)
@@ -69,31 +75,65 @@ def update_plot_scan(file,file2,file3):
     config = literal_eval(str(root.config))
     graph_title = file.replace(str(root.working_directory),'').replace('.csv','')
     
+    x_data = df.potential
+    plot_data=[{'x':x_data,'marker':{'color':'rgb(155,240,255)'},'name':'current'}]
+    
     noise_filter_button = config['noise_filter_button']['children']
     noise_frequency = config['noise_frequency_input']['value']
     if params['type']['value'] in ['Cyclic Voltammetry','Linear Sweep Voltammetry']:
         y_data = df.current
+        plot_data[0]['y'] = y_data
         noise_filter = {'display':'flex','alignItems':'center'}
         if noise_filter_button == 'Noise Filter On':
             data_label = 'current_filtered_{}Hz'.format(noise_frequency)
             if data_label in df.columns:
                 y_data = df[data_label]
+                plot_data[0]['y'] = y_data
             else:
                 y_data = ac_noise_filter(noise_frequency,params['Samplerate']['value'],df.current)
+                plot_data[0]['y'] = y_data
                 df[data_label] = y_data
                 df.to_csv(file, index=False)
     elif params['type']['value'] in ['Differential Pulse Voltammetry','Squarewave Voltammetry']:
         y_data = df.fbcurrent
+        plot_data[0]['y'] = y_data
         noise_filter = {'display':'none'}
+    
+    if config['peak_detection_switch']['on']:
+        baseline_polynomial = config['baseline_polynomial_input']['value']
+        peak_threshold = config['peak_threshold_input']['value']/config['peak_threshold_range']['value']
+        mv_step = (x_data.iloc[0]-x_data.iloc[9])/10
+        peak_dist = int(config['peak_distance_input']['value']/mv_step)
         
-    x_data = df.potential 
+        if mean(y_data) < 0:
+            scale_factor = -1
+        else:
+            scale_factor = 1
+        base = pu.baseline(y_data*scale_factor, baseline_polynomial)
+        peaks = pu.peak.indexes(y_data*scale_factor-base, thres=peak_threshold, min_dist=peak_dist, thres_abs=True)
+        #peaks_gaussian = pu.peak.interpolate(x_data, y_data*scale_factor-base, ind=peaks, width=50)
+        #print(peaks_gaussian)
+        peaks_x = x_data.iloc[peaks]
+        peaks_y = y_data.iloc[peaks]
+        y_base_removed = y_data*scale_factor-base
+        peak_heights = y_base_removed.iloc[peaks]
+        peaks_labels = []
+        for i in range(len(peaks_x)):
+            peaks_labels.append('{0:.0f} mV<br>{1:.2E} A'.format(peaks_x.iloc[i],peak_heights.iloc[i]))
+        plot_data.append({'x':peaks_x,'y':peaks_y,
+                          'mode':"markers+text",
+                          'marker':{'color':'rgb(255,120,0)'},
+                          'text':peaks_labels,
+                          'textfont':{'color':'rgb(255,255,255)'},
+                          'textposition':'top center',
+                          'name':'peak'})
+        if config['baseline_switch']['on']:
+            plot_data.append({'x':x_data,'y':base*scale_factor,
+                              'marker':{'color':'rgb(0,180,0)'},
+                              'name':'baseline'})
     
     figure={
-        'data':[{'x':x_data,
-                 'y':y_data,
-                 'marker':{'color':'rgb(155,240,255)'}
-                 }
-                ],
+        'data':plot_data,
         'layout':{
             'title':{
                 'text':graph_title,
@@ -119,7 +159,8 @@ def update_plot_scan(file,file2,file3):
                 'tickfont':{'color':'white'}
                 },
             'paper_bgcolor':'rgba(0,0,0,0)',
-            'plot_bgcolor':'rgba(0,0,0,0)'
+            'plot_bgcolor':'rgba(0,0,0,0)',
+            'showlegend':False,
             }
         }
     return [figure,collapse_params,noise_filter]
@@ -151,7 +192,7 @@ def ac_noise_filter(noise_freq, sample_freq, data):
     yf4 = signal.filtfilt(g,h,yf3) 
     yf5 = signal.filtfilt(i,j,yf4)
     
-    return yf5
+    return pd.Series(yf5)
 
 factors={'Cyclic Voltammetry Experiment\n':
     ['Comment','Samplerate','t_preconditioning1','t_preconditioning2',

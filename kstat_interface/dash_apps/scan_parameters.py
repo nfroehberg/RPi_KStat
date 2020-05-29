@@ -12,11 +12,12 @@ import dash_html_components as html
 import dash_daq as daq
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from dash import no_update
+from dash import no_update, callback_context
 from redisworks import Root
 from .. import redis_config
 from .app import app, write_config
 from ast import literal_eval
+from time import time
 
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
@@ -33,13 +34,11 @@ def scan_parameters():
         children=[
             html.Div(className='left_row',
                 children=[
-                    html.Button(children='Scan Parameters',
-                        id='scan_parameters_button',
-                        style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
                     html.Div(id='noise_filter_container',
+                        className='left_row',
                         children=[
-                            html.Div(style={'width':'5px'}),
                             html.Button(id='noise_filter_button',
+                                children='Noise Filter',
                                 style={'width':'120px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px','padding':'0 0'}),
                             html.Div(style={'width':'5px'}),
                             dcc.Store(id='noise_frequency_input_value_update', data=1),
@@ -53,24 +52,274 @@ def scan_parameters():
                             html.Label(htmlFor='noise_frequency_input',
                                 children='Hz AC',
                                 style={'width':'70px','height':'20px','fontSize':'small','padding':'5px 5px'})
-                            ])
+                            ]),
+                    html.Button(children='Scan Parameters',
+                        id='scan_parameters_button',
+                        style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
+                    html.Div(style={'width':'5px'}),
+                    html.Button(children='Peak Detection',
+                        id='peak_detection_button',
+                        style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
                     ]),
-            dbc.Collapse(id='scan_parameters_collapse',
-                children='Hello')])
+            dbc.Collapse(id='scan_parameters_collapse'),
+            dbc.Collapse(id='peak_detection_collapse',
+                className='left_row',
+                children=[
+                    peak_detection_switch(),
+                    baseline_switch(),
+                    baseline_polynomial(),
+                    peak_distance(),
+                    peak_threshold(),
+                    ])
+                ])
 
-# open/close collapsible section to display voltammetric parameters for displayed voltammogramm
 @app.callback(
-    Output('scan_parameters_collapse','is_open'),
-    [Input('scan_parameters_button','n_clicks')],
-    [State('scan_parameters_collapse','is_open')])
-def open_scan_parameters(n_clicks,is_open):
-    if n_clicks != None:
-        if is_open:
-            return False
-        else:
-            return True
+    Output('voltammogram_graph_file4','data'),
+    [Input('peak_threshold_input_graph_update','data'),
+     Input('peak_threshold_range_graph_update','data'),
+     Input('peak_distance_input_graph_update','data'),
+     Input('baseline_polynomial_input_graph_update','data'),
+     Input('baseline_switch_graph_update','data'),
+     Input('peak_detection_switch_graph_update','data')],
+    [State('voltammogram_graph_file','data')])
+def update_graph_peak(input1,input2,input3,input4,input5,input6,file):
+    return file
+
+def peak_threshold():
+    return html.Div(id='peak_threshold_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'50px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='peak_threshold_input',
+                        min=1,
+                        max=999,
+                        size=50
+                        )
+                    )
+                ),
+            dcc.Store(id='peak_threshold_input_value_update', data=1),
+            dcc.Store(id='peak_threshold_input_value_update_acknowledged', data=2),
+            dcc.Store(id='peak_threshold_input_graph_update'),
+            dcc.Store(id='peak_threshold_range_value_update', data=1),
+            dcc.Store(id='peak_threshold_range_value_update_acknowledged', data=2),
+            dcc.Store(id='peak_threshold_range_graph_update'),
+            html.Div(style={'width':'5px'}),
+            dcc.Dropdown(
+                id='peak_threshold_range',
+                style={'width':'40px','color':'black','fontSize':'x-small'},
+                clearable=False,
+                options=[
+                    {'label':'A','value':1},
+                    {'label':'mA','value':1000},
+                    {'label':'µA','value':1000000},
+                    {'label':'nA','value':1000000000},
+                    {'label':'pA','value':1000000000000},
+                    {'label':'fA','value':1000000000000000},
+                    ]
+                ),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='peak_threshold_input',
+                       children=['Peak',html.Br(),'Threshold'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('peak_threshold_input_value_update_acknowledged','data'),
+     Output('peak_threshold_input_graph_update','data')],
+    [Input('peak_threshold_input','value')],
+    [State('peak_threshold_input_value_update','data'),
+     State('peak_threshold_input_value_update_acknowledged','data')])
+def update_peak_threshold(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'peak_threshold_input',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
     else:
+        return [update, no_update]
+@app.callback(
+    [Output('peak_threshold_range_value_update_acknowledged','data'),
+     Output('peak_threshold_range_graph_update','data')],
+    [Input('peak_threshold_range','value')],
+    [State('peak_threshold_range_value_update','data'),
+     State('peak_threshold_range_value_update_acknowledged','data')])
+def update_peak_range(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'peak_threshold_range',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+
+def peak_distance():
+    return html.Div(id='peak_distance_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'95px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='peak_distance_input',
+                        min=0,
+                        max=1999,
+                        size=95
+                        )
+                    )
+                ),
+            dcc.Store(id='peak_distance_input_value_update', data=1),
+            dcc.Store(id='peak_distance_input_value_update_acknowledged', data=2),
+            dcc.Store(id='peak_distance_input_graph_update'),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='peak_distance_input',
+                       children=['Min Peak',html.Br(),'Distance [mV]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('peak_distance_input_value_update_acknowledged','data'),
+     Output('peak_distance_input_graph_update','data')],
+    [Input('peak_distance_input','value')],
+    [State('peak_distance_input_value_update','data'),
+     State('peak_distance_input_value_update_acknowledged','data')])
+def update_peak_distance(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'peak_distance_input',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+
+def baseline_polynomial():
+    return html.Div(id='baseline_polynomial_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'95px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='baseline_polynomial_input',
+                        min=1,
+                        max=25,
+                        size=95
+                        )
+                    )
+                ),
+            dcc.Store(id='baseline_polynomial_input_value_update', data=1),
+            dcc.Store(id='baseline_polynomial_input_value_update_acknowledged', data=2),
+            dcc.Store(id='baseline_polynomial_input_graph_update'),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='baseline_polynomial_input',
+                       children=['Baseline',html.Br(),'Polynomial'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('baseline_polynomial_input_value_update_acknowledged','data'),
+     Output('baseline_polynomial_input_graph_update','data')],
+    [Input('baseline_polynomial_input','value')],
+    [State('baseline_polynomial_input_value_update','data'),
+     State('baseline_polynomial_input_value_update_acknowledged','data')])
+def update_baseline_polynomial(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'baseline_polynomial_input',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+
+def baseline_switch():
+    return html.Div(id='baseline_switch_container',
+        className='centered_row',
+        children=[
+            daq.BooleanSwitch(id="baseline_switch",style={'width':'95px'}),
+            html.Div(style={'width':'10px'}),
+            html.Label(
+                htmlFor='baseline_switch',
+                children='Show Baseline',
+                style={'width':'110px'}),
+            dcc.Store(id='baseline_switch_on_update', data=1),
+            dcc.Store(id='baseline_switch_on_update_acknowledged', data=2),
+            dcc.Store(id='baseline_switch_graph_update'),]
+    )
+    
+# if state of purge switch changes, write to config file
+@app.callback(
+    [Output('baseline_switch_on_update_acknowledged','data'),
+     Output('baseline_switch_graph_update','data')],
+    [Input('baseline_switch','on')],
+    [State('baseline_switch_on_update','data'),
+    State('baseline_switch_on_update_acknowledged','data')])
+def activate_baseline(switch, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'baseline_switch','attribute':'on','value':switch}])
+        root.flush()
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+        
+def peak_detection_switch():
+    return html.Div(id='peak_detection_switch_container',
+        className='centered_row',
+        children=[
+            daq.BooleanSwitch(id="peak_detection_switch",style={'width':'95px'}),
+            html.Div(style={'width':'10px'}),
+            html.Label(
+                htmlFor='peak_detection_switch',
+                children='Automatic Detection',
+                style={'width':'110px'}),
+            dcc.Store(id='peak_detection_switch_on_update', data=1),
+            dcc.Store(id='peak_detection_switch_on_update_acknowledged', data=2),
+            dcc.Store(id='peak_detection_switch_graph_update'),]
+    )
+    
+# if state of purge switch changes, write to config file
+@app.callback(
+    [Output('peak_detection_switch_on_update_acknowledged','data'),
+     Output('peak_detection_switch_graph_update','data')],
+    [Input('peak_detection_switch','on')],
+    [State('peak_detection_switch_on_update','data'),
+    State('peak_detection_switch_on_update_acknowledged','data')])
+def activate_peak_detection(switch, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'peak_detection_switch','attribute':'on','value':switch}])
+        root.flush()
+        return [no_update,time()]
+    else:
+        return [update,no_update]
+  
+# open/close collapsible section to display voltammetric parameters for displayed voltammogramm or peak detection settings
+# only one of them is opened at a time and if same button is pressed again, the section is collapsed
+@app.callback(
+    [Output('scan_parameters_collapse','is_open'),
+     Output('peak_detection_collapse','is_open')],
+    [Input('scan_parameters_button','n_clicks'),
+     Input('peak_detection_button','n_clicks')],
+    [State('scan_parameters_collapse','is_open'),
+     State('peak_detection_collapse','is_open')])
+def open_scan_parameters(parameters_clicks,peak_clicks,parameter_open,peak_open):
+    ctx = callback_context
+    if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if trigger_id == 'scan_parameters_button':
+        if parameter_open:
+            return [False, False]
+        else:
+            return [True, False]
+    else:
+        if peak_open:
+            return [False, False]
+        else:
+            return [False, True]
 
 # activate/deactivate AC noise filter for linear/cyclic voltammetric measurements
 @app.callback(
