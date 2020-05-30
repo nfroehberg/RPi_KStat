@@ -19,7 +19,7 @@ import json
 from .app import app, write_config
 from .. import redis_config
 from scipy import signal
-from numpy import mean
+from numpy import mean, abs
 import pandas as pd
 import peakutils as pu
 
@@ -104,24 +104,29 @@ def update_plot_scan(file,file2,file3,file4):
         peak_threshold = config['peak_threshold_input']['value']/config['peak_threshold_range']['value']
         mv_step = (x_data.iloc[0]-x_data.iloc[9])/10
         peak_dist = int(config['peak_distance_input']['value']/mv_step)
+        peak_width = int(config['peak_width_input']['value']/mv_step)
         
+        # positive or negative current
         if mean(y_data) < 0:
             scale_factor = -1
         else:
             scale_factor = 1
+            
         base = pu.baseline(y_data*scale_factor, baseline_polynomial)
         peaks = pu.peak.indexes(y_data*scale_factor-base, thres=peak_threshold, min_dist=peak_dist, thres_abs=True)
-        #peaks_gaussian = pu.peak.interpolate(x_data, y_data*scale_factor-base, ind=peaks, width=50)
-        #print(peaks_gaussian)
-        peaks_x = x_data.iloc[peaks]
-        peaks_y = y_data.iloc[peaks]
+        peaks_gaussian = pu.peak.interpolate(x_data.values, (y_data*scale_factor-base).values, ind=peaks, width=peak_width)
+        peaks_gaussian_indices = []
+        for peak in peaks_gaussian:
+            peaks_gaussian_indices.append((abs(x_data.values - peak)).argmin())
+        peaks_x = x_data.iloc[peaks_gaussian_indices]
+        peaks_y = y_data.iloc[peaks_gaussian_indices]
         y_base_removed = y_data*scale_factor-base
-        peak_heights = y_base_removed.iloc[peaks]
+        peak_heights = y_base_removed.iloc[peaks_gaussian_indices]
         peaks_labels = []
         for i in range(len(peaks_x)):
             peaks_labels.append('{0:.0f} mV<br>{1:.2E} A'.format(peaks_x.iloc[i],peak_heights.iloc[i]))
         plot_data.append({'x':peaks_x,'y':peaks_y,
-                          'mode':"markers+text",
+                          'mode':'markers+text',
                           'marker':{'color':'rgb(255,120,0)'},
                           'text':peaks_labels,
                           'textfont':{'color':'rgb(255,255,255)'},

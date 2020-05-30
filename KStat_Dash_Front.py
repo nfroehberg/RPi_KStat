@@ -115,6 +115,7 @@ initial_config={
     'peak_threshold_range':{'value':1000000000000},
     'peak_distance_input':{'value':100},
     'baseline_polynomial_input':{'value':4},
+    'peak_width_input':{'value':20},
     }
 
 def initialize_config(root):

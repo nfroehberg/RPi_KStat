@@ -37,10 +37,12 @@ def directory_and_scan_selection():
             html.P(id='directory_text',
                 children='Directory',
                 style={'paddingTop':'15px','width':'200px','overflowWrap':'break-word'}),
+            dbc.Tooltip('current working directory',target='directory_text'),
             html.Button( id='change_directory_button',
                 style={'fontSize':'xx-large','border': '0',
                        'marginLeft':'10px'},
                 children=u"\U0001F5C1"),
+            dbc.Tooltip('change working directory and/or delete files/folders',target='change_directory_button'),
             dcc.Store('directory_popup_placeholder1'), #used to open popup
             dcc.Store('directory_popup_placeholder2'), #used to close popup and confirm directory change
             dcc.Store('directory_popup_placeholder3'), #used to close popup and cancel directory change
@@ -94,6 +96,7 @@ def directory_and_scan_selection():
             style={'fontSize':'xx-large','border': '0',
                    'marginLeft':'10px'},
             children=u"\U000021A5"),
+        dbc.Tooltip('upload files',target='upload_button'),
         dcc.Store(id='upload_popup_placeholder1'),
         dcc.Store(id='upload_popup_placeholder2'),
         dbc.Modal(id='upload_popup',
@@ -121,6 +124,7 @@ def directory_and_scan_selection():
             style={'fontSize':'xx-large','border': '0',
                    'marginLeft':'10px'},
             children=u"\U00002913"),
+        dbc.Tooltip('download files',target='download_button'),
         dcc.Store(id='download_popup_placeholder1'),
         dcc.Store(id='download_popup_placeholder2'),
         dbc.Modal(id='download_popup',

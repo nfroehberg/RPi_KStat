@@ -34,25 +34,7 @@ def scan_parameters():
         children=[
             html.Div(className='left_row',
                 children=[
-                    html.Div(id='noise_filter_container',
-                        className='left_row',
-                        children=[
-                            html.Button(id='noise_filter_button',
-                                children='Noise Filter',
-                                style={'width':'120px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px','padding':'0 0'}),
-                            html.Div(style={'width':'5px'}),
-                            dcc.Store(id='noise_frequency_input_value_update', data=1),
-                            dcc.Store(id='noise_frequency_input_value_update_acknowledged', data=2),
-                            dcc.Input(id='noise_frequency_input',
-                                type='number',
-                                style={'backgroundColor':'transparent','color':'rgb(200, 200, 200)','width':'50px','height':'20px',
-                                'fontSize':'small','textAlign':'center','border': '1px solid #bbb'},
-                                debounce=True,
-                                ),
-                            html.Label(htmlFor='noise_frequency_input',
-                                children='Hz AC',
-                                style={'width':'70px','height':'20px','fontSize':'small','padding':'5px 5px'})
-                            ]),
+                    noise_filter(),
                     html.Button(children='Scan Parameters',
                         id='scan_parameters_button',
                         style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
@@ -70,6 +52,7 @@ def scan_parameters():
                     baseline_polynomial(),
                     peak_distance(),
                     peak_threshold(),
+                    peak_width(),
                     ])
                 ])
 
@@ -80,9 +63,10 @@ def scan_parameters():
      Input('peak_distance_input_graph_update','data'),
      Input('baseline_polynomial_input_graph_update','data'),
      Input('baseline_switch_graph_update','data'),
-     Input('peak_detection_switch_graph_update','data')],
+     Input('peak_detection_switch_graph_update','data'),
+     Input('peak_width_input_graph_update','data'),],
     [State('voltammogram_graph_file','data')])
-def update_graph_peak(input1,input2,input3,input4,input5,input6,file):
+def update_graph_peak(input1,input2,input3,input4,input5,input6,input7,file):
     return file
 
 def peak_threshold():
@@ -121,6 +105,8 @@ def peak_threshold():
                     {'label':'fA','value':1000000000000000},
                     ]
                 ),
+            dbc.Tooltip('minimum peak current for detection (baseline removed)',
+                target='peak_threshold_input'),
             html.Div(style={'width':'10px'}),
             html.Label(htmlFor='peak_threshold_input',
                        children=['Peak',html.Br(),'Threshold'],
@@ -150,6 +136,48 @@ def update_peak_threshold(value, update, update_acknowledged):
 def update_peak_range(value, update, update_acknowledged):
     if update == update_acknowledged:
         write_config([{'component':'peak_threshold_range',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+
+def peak_width():
+    return html.Div(id='peak_width_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'95px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='peak_width_input',
+                        min=0,
+                        max=1999,
+                        size=95
+                        )
+                    )
+                ),
+            dbc.Tooltip('range around peak value used for Gaussian fitting (refinement of peak location)',
+                target='peak_width_input'),
+            dcc.Store(id='peak_width_input_value_update', data=1),
+            dcc.Store(id='peak_width_input_value_update_acknowledged', data=2),
+            dcc.Store(id='peak_width_input_graph_update'),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='peak_width_input',
+                       children=['Peak',html.Br(),'Width [mV]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('peak_width_input_value_update_acknowledged','data'),
+     Output('peak_width_input_graph_update','data')],
+    [Input('peak_width_input','value')],
+    [State('peak_width_input_value_update','data'),
+     State('peak_width_input_value_update_acknowledged','data')])
+def update_peak_width(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'peak_width_input',
                        'attribute':'value','value':value}])
         return [no_update, time()]
     else:
@@ -211,6 +239,8 @@ def baseline_polynomial():
                         )
                     )
                 ),
+            dbc.Tooltip('degree of ploynomial function for baseline estimation',
+                target='baseline_polynomial_input'),
             dcc.Store(id='baseline_polynomial_input_value_update', data=1),
             dcc.Store(id='baseline_polynomial_input_value_update_acknowledged', data=2),
             dcc.Store(id='baseline_polynomial_input_graph_update'),
@@ -320,6 +350,29 @@ def open_scan_parameters(parameters_clicks,peak_clicks,parameter_open,peak_open)
             return [False, False]
         else:
             return [False, True]
+
+def noise_filter():
+    return html.Div(id='noise_filter_container',
+        className='left_row',
+        children=[
+            html.Button(id='noise_filter_button',
+                children='Noise Filter',
+                style={'width':'120px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px','padding':'0 0'}),
+            html.Div(style={'width':'5px'}),
+            dcc.Store(id='noise_frequency_input_value_update', data=1),
+            dcc.Store(id='noise_frequency_input_value_update_acknowledged', data=2),
+            dcc.Input(id='noise_frequency_input',
+                type='number',
+                style={'backgroundColor':'transparent','color':'rgb(200, 200, 200)','width':'50px','height':'20px',
+                'fontSize':'small','textAlign':'center','border': '1px solid #bbb'},
+                debounce=True,
+                ),
+            dbc.Tooltip('typically 50Hz (Europe) or 60Hz (US), main frequency and harmonics are filtered from the data',
+                target='noise_frequency_input'),
+            html.Label(htmlFor='noise_frequency_input',
+                children='Hz AC',
+                style={'width':'70px','height':'20px','fontSize':'small','padding':'5px 5px'})
+            ])
 
 # activate/deactivate AC noise filter for linear/cyclic voltammetric measurements
 @app.callback(

@@ -75,6 +75,7 @@ update_list=[
     ('peak_threshold_range','value',True),
     ('peak_distance_input','value',True),
     ('baseline_polynomial_input','value',True),
+    ('peak_width_input','value',True),
     ]
 
 ####################################################################

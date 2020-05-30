@@ -67,6 +67,11 @@ html {
     line-height: 20px;
 }
 
+.tooltip-inner{
+    font-size:small;
+    background-color: #001839;
+}
+
 /* Base Styles
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 /* NOTE
