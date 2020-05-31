@@ -28,6 +28,8 @@ def hg_au_electrode_testing(config, motor, ser):
     id = config['popup_measurement_id']['value']
     n_tests = config['n_electrode_tests_input']['value']
     
+    
+    file_options = config['scan_selector']['options']
     # all but the last test scan are executed, shown, then deleted
     for i in range(n_tests-1):
         file = root.working_directory + id + '_test' + str(i+1)
@@ -37,7 +39,12 @@ def hg_au_electrode_testing(config, motor, ser):
         
         cv_measurement(config, motor, ser, file)
         
-        write_config([{'component':'graph_file','attribute':'data','value':file}])
+        if i == 0:
+            file_options.append({'label':id + '_test' + str(i+1),'value':file+'.csv'})
+        else:
+            file_options[-1]={'label':id + '_test' + str(i+1),'value':file+'.csv'}
+        write_config([{'component':'scan_selector','attribute':'options','value':file_options},
+                      {'component':'scan_selector','attribute':'value','value':file+'.csv'}])
         # delete previous scan
         if i > 0:
             files = glob('{}/*'.format(root.working_directory))
@@ -61,7 +68,9 @@ def hg_au_electrode_testing(config, motor, ser):
     KStat.idle(ser,0)
     
     # reenable user controls
-    write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},
+    file_options[-1]={'label':id,'value':file+'.csv'}
+    write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},                    
                   {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
-                  {'component':'graph_file','attribute':'data','value':file}])
+                  {'component':'scan_selector','attribute':'options','value':file_options},
+                  {'component':'scan_selector','attribute':'value','value':file+'.csv'}])
     controls_disabled(False)

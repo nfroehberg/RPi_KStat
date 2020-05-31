@@ -103,7 +103,6 @@ initial_config={
     'start_button':{'disabled':False,'triggered':False},
     'stop_button':{'disabled':True,'triggered':False},
     'popup_measurement_id':{'value':''},
-    'graph_file':{'data':''},
     'upload_button':{'disabled':False},
     'download_button':{'disabled':False},
     'change_directory_button':{'disabled':False},
@@ -116,6 +115,7 @@ initial_config={
     'peak_distance_input':{'value':100},
     'baseline_polynomial_input':{'value':4},
     'peak_width_input':{'value':20},
+    'scan_selector':{'options':[],'value':''},
     }
 
 def initialize_config(root):

@@ -29,10 +29,13 @@ def directory_and_scan_selection():
         children=[
             dcc.Interval(id='directory_and_scan_initialization',disabled=False),
             dcc.Store(id='files_initialization'),
-            dcc.Store(id='graph_file'),
+            
+            dcc.Store(id='scan_selector_value_update', data=1),
+            dcc.Store(id='scan_selector_value_update_acknowledged', data=2),
             dcc.Dropdown(id='scan_selector',
                 style={'width':'250px','color':'black'},
                 clearable=False),
+                
             html.Div(style={'width':'100px'}),
             html.P(id='directory_text',
                 children='Directory',
@@ -171,33 +174,37 @@ def directory_and_scan_selection():
                 ]),
         ])
 
-
 @app.callback(
-    [Output('voltammogram_graph_file','data'),
+    [Output('scan_selector_value_update_acknowledged','data'),
+     Output('voltammogram_graph_file','data'),
      Output('clear_points','data')],
-    [Input('scan_selector','value')])
-def select_scan(value):
-    if value != None:
-        root.graph_file=value
-        return [value, True]
-    raise PreventUpdate
-
+    [Input('scan_selector','value')],
+    [State('scan_selector_value_update','data'),
+     State('scan_selector_value_update_acknowledged','data')])
+def update_cleaning_time(value, update, update_acknowledged):
+    ctx = dash.callback_context
+    if ctx.triggered[0]['value'] is None:
+        raise PreventUpdate
+        
+    if update == update_acknowledged:
+        write_config([{'component':'scan_selector',
+                       'attribute':'value','value':value}])
+        return [no_update, value, True]
+    else:
+        return [update, value, True]
 
 @app.callback(
-    [Output('scan_selector','options'),
-    Output('scan_selector','value'),
-    Output('directory_selection','options'),
-	Output('directory_file_list','options'),
-    Output('directory_text','children')],
+    [Output('directory_selection','options'),
+	 Output('directory_file_list','options'),
+     Output('directory_text','children')],
     [Input('working_directory_update','data'),
-    Input('files_update','data'),
-    Input('files_initialization','data'),
-    Input('new_directory_update','data'),
-    Input('delete_files_update','data'),
-    Input('delete_directory_update','data'),
-    Input('graph_file','data')],
+     Input('files_update','data'),
+     Input('files_initialization','data'),
+     Input('new_directory_update','data'),
+     Input('delete_files_update','data'),
+     Input('delete_directory_update','data')],
     [State('scan_selector','value')])
-def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_files,delete_directory,graph_file,selected_scan):
+def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_files,delete_directory,selected_scan):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
@@ -223,16 +230,14 @@ def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_fi
     for file in file_list:
         label=file.replace(str(root.working_directory),'').replace('.csv','')
         file_options.append({'label':label,'value':file})
+    write_config([{'component':'scan_selector','attribute':'options','value':file_options}])
     
     label=str(root.working_directory).replace(str(root.main_directory),'').strip('/')
-    
-    if selected_scan == None:
-        selected_scan = file_options[0]['value']
     
     if trigger_id == 'graph_file':
         selected_scan = graph_file+'.csv'
     
-    return[file_options, selected_scan, directory_options, file_options, label]
+    return[directory_options, file_options, label]
 
 # reload list of files on page reload
 @app.callback(

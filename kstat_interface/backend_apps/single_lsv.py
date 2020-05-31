@@ -30,9 +30,12 @@ def single_lsv(config, motor, ser):
     
     KStat.idle(ser,0)
     
-    write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},
-                    {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
-                    {'component':'graph_file','attribute':'data','value':file}])
+    file_options = config['scan_selector']['options']
+    file_options.append({'label':id,'value':file+'.csv'})
+    write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},                    
+                  {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
+                  {'component':'scan_selector','attribute':'options','value':file_options},
+                  {'component':'scan_selector','attribute':'value','value':file+'.csv'}])
     controls_disabled(False)
 
 def lsv_measurement(config, motor, ser, file):

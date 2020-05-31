@@ -63,7 +63,6 @@ update_list=[
     ('n_electrode_tests_input','value',True),
     ('start_button','disabled',False),
     ('stop_button','disabled',False),
-    ('graph_file','data',False),
     ('change_directory_button','disabled',False),
     ('upload_button','disabled',False),
     ('download_button','disabled',False),
@@ -76,6 +75,8 @@ update_list=[
     ('peak_distance_input','value',True),
     ('baseline_polynomial_input','value',True),
     ('peak_width_input','value',True),
+    ('scan_selector','options',False),
+    ('scan_selector','value',True),
     ]
 
 ####################################################################
