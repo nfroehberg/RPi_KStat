@@ -28,14 +28,47 @@ root = Root(host=redis_host, port=redis_port, db=0)
 
 def plot_scan():
     return html.Div(id='voltammogram_graph_container',
-        style={'width':'100%'},
+        className='voltammogramm',
         children=[
+            dcc.Graph(id='voltammogram_graph',
+                className='graph',
+                config={'showEditInChartStudio':True,
+                        'modeBarButtonsToRemove':['select2d','lasso2d',
+                        'hoverClosestCartesian','hoverCompareCartesian',
+                        'toggleHover','toggleSpikelines'],
+                        'responsive':True,'autosizable':True,
+                        'showAxisDragHandle':True,'displaylogo':False,
+                        'scrollZoom':True,'editable':True
+                        },
+                figure={'layout':{
+                            'xaxis':{
+                                'title':{
+                                    'text':'Potential [mV] vs. Ag/AgCl',
+                                    'font':{'color':'white'}},
+                                'gridcolor':'black',
+                                'zerolinecolor':'black',
+                                'zerolinewidth':2,
+                                'tickfont':{'color':'white'}
+                                },
+                            'yaxis':{
+                                'title':{
+                                    'text':'Current [A]',
+                                    'font':{'color':'white'}},
+                                'gridcolor':'black',
+                                'zerolinecolor':'black',
+                                'zerolinewidth':2,
+                                'tickfont':{'color':'white'}
+                                },
+                            'paper_bgcolor':'rgba(0,0,0,0)',
+                            'plot_bgcolor':'rgba(0,0,0,0)',
+                            'showlegend':False,
+                            'autosize':True}}
+                ),
             dcc.Store(id='voltammogram_graph_file'),
             dcc.Store(id='voltammogram_graph_file2'),
             dcc.Store(id='voltammogram_graph_file3'),
             dcc.Store(id='voltammogram_graph_file4'),
             dcc.Store(id='voltammogram_graph_file5'),
-            dcc.Graph(id='voltammogram_graph'),
             dcc.Store(id='voltammogram_point1',data='no point'),
             dcc.Store(id='voltammogram_point2',data='no point'),
             dcc.Store(id='clear_points'),
@@ -199,6 +232,7 @@ def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
             'paper_bgcolor':'rgba(0,0,0,0)',
             'plot_bgcolor':'rgba(0,0,0,0)',
             'showlegend':False,
+            'autosize':True,
             }
         }
     return [figure,collapse_params,noise_filter,peakfile]

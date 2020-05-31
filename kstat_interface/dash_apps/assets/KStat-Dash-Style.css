@@ -11,6 +11,14 @@ html {
   background-position: top;
   background-attachment: fixed;}
 
+.voltammogramm{
+    width:100%;
+}
+.graph{
+    width:100%;
+    height:100%;
+}
+
 .centered_row{
 	display:flex;
 	justify-content:center;
@@ -44,11 +52,13 @@ html {
 @media (orientation: landscape) {
   .program_dropdown{width:30%;}
   .main_program{width:70%;}
+  .voltammogramm{height:80vh;}
 }
 
 @media (orientation: portrait) {
   .program_dropdown{width:100%;}
   .main_program{width:90%;}
+  .voltammogramm{height:40vh;}
 }
 
 .progress_label {
