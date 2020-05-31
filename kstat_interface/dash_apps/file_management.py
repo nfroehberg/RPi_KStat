@@ -173,12 +173,13 @@ def directory_and_scan_selection():
 
 
 @app.callback(
-    Output('voltammogram_graph_file','data'),
+    [Output('voltammogram_graph_file','data'),
+     Output('clear_points','data')],
     [Input('scan_selector','value')])
 def select_scan(value):
     if value != None:
         root.graph_file=value
-        return value
+        return [value, True]
     raise PreventUpdate
 
 
@@ -230,6 +231,7 @@ def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_fi
     
     if trigger_id == 'graph_file':
         selected_scan = graph_file+'.csv'
+    
     return[file_options, selected_scan, directory_options, file_options, label]
 
 # reload list of files on page reload
@@ -540,6 +542,7 @@ def downloadFiles(n_clicks,files):
         zipObj = ZipFile(filename, 'w')
         for file in files:
             file_parameters=file.replace('.csv','')+'-parameters.txt'
+            file_peaks=file.replace('.csv','')+'-peaks.txt'
             file_plot=file.replace('.csv','')+'.png'
             if os.path.exists(file):
                 zipObj.write(file,file[file.rfind('/')+1:])
@@ -547,6 +550,8 @@ def downloadFiles(n_clicks,files):
                 zipObj.write(file_parameters,file_parameters[file_parameters.rfind('/')+1:])
             if os.path.exists(file_plot):
                 zipObj.write(file_plot,file_plot[file_plot.rfind('/')+1:])
+            if os.path.exists(file_peaks):
+                zipObj.write(file_peaks,file_peaks[file_peaks.rfind('/')+1:])
         zipObj.close()
         return ['open',only_filename]
     else:

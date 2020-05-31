@@ -48,11 +48,18 @@ def scan_parameters():
                 className='left_row',
                 children=[
                     peak_detection_switch(),
+                    manual_peak_detection(),
                     baseline_switch(),
                     baseline_polynomial(),
                     peak_distance(),
                     peak_threshold(),
                     peak_width(),
+                    html.Button(id='save_peak_button',children='Save Peak(s)',
+                        style={'width':'225px'}),
+                    dbc.Tooltip('Saves manually and/or automatically determined peaks to file, depending which is active',
+                        target='save_peak_button'),
+                    dcc.Store(id='peak_file_data',data=''),
+                    dcc.Store(id='peak_file_placeholder'),
                     ])
                 ])
 
@@ -68,6 +75,18 @@ def scan_parameters():
     [State('voltammogram_graph_file','data')])
 def update_graph_peak(input1,input2,input3,input4,input5,input6,input7,file):
     return file
+
+@app.callback(
+     Output('peak_file_placeholder','data'),
+    [Input('save_peak_button','n_clicks')],
+    [State('peak_file_data','data')])
+def save_peak_data(n_clicks,data):
+    if n_clicks != None:
+        if data != '':
+            f = open(data[0],'w')
+            f.write(data[1])
+            f.close()
+    raise PreventUpdate
 
 def peak_threshold():
     return html.Div(id='peak_threshold_input_container',
@@ -294,7 +313,20 @@ def activate_baseline(switch, update, update_acknowledged):
         return [no_update, time()]
     else:
         return [update, no_update]
-        
+
+def manual_peak_detection():
+    return html.Div(id='manual_peak_detection_container',
+        className='centered_row',
+        children=[
+            daq.BooleanSwitch(id="manual_peak_detection",style={'width':'95px'}),
+            html.Div(style={'width':'10px'}),
+            html.Label(
+                htmlFor='manual_peak_detection',
+                children='Manual Detection',
+                style={'width':'110px'})
+            ]
+    )
+    
 def peak_detection_switch():
     return html.Div(id='peak_detection_switch_container',
         className='centered_row',

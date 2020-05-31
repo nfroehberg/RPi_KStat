@@ -34,28 +34,27 @@ def plot_scan():
             dcc.Store(id='voltammogram_graph_file2'),
             dcc.Store(id='voltammogram_graph_file3'),
             dcc.Store(id='voltammogram_graph_file4'),
+            dcc.Store(id='voltammogram_graph_file5'),
             dcc.Graph(id='voltammogram_graph'),
+            dcc.Store(id='voltammogram_point1',data='no point'),
+            dcc.Store(id='voltammogram_point2',data='no point'),
+            dcc.Store(id='clear_points'),
             ]
         )
-
-# generate dash components to display scan parameters
-def generate_param_components(params):
-    param_components = []
-    for factor in params:
-        label = html.Div(children=params[factor]['label'], style={'width':'180px'})
-        value = html.Div(children=params[factor]['value'], style={'width':'250px'})
-        param_components.append(html.Div(children=[label,value],className='centered_row'))
-    return html.Div(children=param_components,className='left_row')
-
+        
 @app.callback(
     [Output('voltammogram_graph','figure'),
      Output('scan_parameters_collapse','children'),
-     Output('noise_filter_container','style')],
+     Output('noise_filter_container','style'),
+     Output('peak_file_data','data')],
     [Input('voltammogram_graph_file','data'),
      Input('voltammogram_graph_file2','data'),
      Input('voltammogram_graph_file3','data'),
-     Input('voltammogram_graph_file4','data')])
-def update_plot_scan(file,file2,file3,file4):
+     Input('voltammogram_graph_file4','data'),
+     Input('voltammogram_graph_file5','data')],
+     [State('voltammogram_point1','data'),
+      State('voltammogram_point2','data')])
+def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
@@ -67,6 +66,8 @@ def update_plot_scan(file,file2,file3,file4):
         file = file3
     elif trigger_id == 'voltammogram_graph_file4': # triggered by peak detection update
         file = file4
+    elif trigger_id == 'voltammogram_graph_file5': # triggered by click on plot
+        file = file5
     
     params = get_parameters(file)
     collapse_params = generate_param_components(params)
@@ -99,6 +100,12 @@ def update_plot_scan(file,file2,file3,file4):
         plot_data[0]['y'] = y_data
         noise_filter = {'display':'none'}
     
+    if not config['peak_detection_switch']['on'] and point1 == 'no point':
+        peakfile = ''
+    else:
+        peakfile = [file.replace('.csv','-peaks.txt')]
+        peakfile.append('ID,Detection Mode,Peak Potential [mV],Peak Current [A],\n')
+    
     if config['peak_detection_switch']['on']:
         baseline_polynomial = config['baseline_polynomial_input']['value']
         peak_threshold = config['peak_threshold_input']['value']/config['peak_threshold_range']['value']
@@ -125,6 +132,7 @@ def update_plot_scan(file,file2,file3,file4):
         peaks_labels = []
         for i in range(len(peaks_x)):
             peaks_labels.append('{0:.0f} mV<br>{1:.2E} A'.format(peaks_x.iloc[i],peak_heights.iloc[i]))
+            peakfile[1] = peakfile[1] + '{},automatic,{:.0f},{:.2E},\n'.format(graph_title,peaks_x.iloc[i],peak_heights.iloc[i])
         plot_data.append({'x':peaks_x,'y':peaks_y,
                           'mode':'markers+text',
                           'marker':{'color':'rgb(255,120,0)'},
@@ -136,6 +144,31 @@ def update_plot_scan(file,file2,file3,file4):
             plot_data.append({'x':x_data,'y':base*scale_factor,
                               'marker':{'color':'rgb(0,180,0)'},
                               'name':'baseline'})
+    
+    # manual click points
+    if point1 != 'no point':
+        points = [point1]
+        if point2 != 'no point':
+            points.append(point2)
+        x_points = x_data.iloc[points]
+        y_points = y_data.iloc[points]
+        plot_data.append({'x':x_points,'y':y_points,
+                          'mode':'markers+text',
+                          'marker':{'color':'rgb(255,0,0)'},
+                          'name':'click'})
+        if point2 != 'no point':
+            # lines to connect points and show horizontal and vertical distance
+            v_diff = abs(x_points.iloc[0]-x_points.iloc[1])
+            i_diff = abs(y_points.iloc[0]-y_points.iloc[1])
+            plot_data.append({'x':[x_points.iloc[0],x_points.iloc[1],x_points.iloc[1]],
+                              'y':[y_points.iloc[0],y_points.iloc[0],y_points.iloc[1]],
+                              'mode':'lines','marker':{'color':'rgb(255,0,0)'}})
+            plot_data.append({'x':[x_points.iloc[0]+((x_points.iloc[1]-x_points.iloc[0])/2),x_points.iloc[1]],
+                              'y':[y_points.iloc[0],y_points.iloc[0]+((y_points.iloc[1]-y_points.iloc[0])/2)],
+                              'text':['{:.0f} mV'.format(v_diff),'{:.2E} A'.format(i_diff)],
+                              'mode':'text','textfont':{'color':'rgb(255,0,0)'},
+                              'textposition':['bottom center','middle right'],})
+            peakfile[1] = peakfile[1] + '{},manual,{:.0f},{:.2E},\n'.format(graph_title,x_points.iloc[1],i_diff)
     
     figure={
         'data':plot_data,
@@ -168,8 +201,48 @@ def update_plot_scan(file,file2,file3,file4):
             'showlegend':False,
             }
         }
-    return [figure,collapse_params,noise_filter]
-    
+    return [figure,collapse_params,noise_filter,peakfile]
+
+# if points on graph are clicked, get index. if already two points are selected, remove all
+# if graph file is changed, clear points
+@app.callback(
+    [Output('voltammogram_point1','data'),
+     Output('voltammogram_point2','data'),
+     Output('voltammogram_graph_file5','data')],
+    [Input('voltammogram_graph','clickData'),
+     Input('clear_points','data')],
+    [State('voltammogram_point1','data'),
+     State('voltammogram_point2','data'),
+     State('voltammogram_graph_file','data'),
+     State('manual_peak_detection','on')])
+def catch_click(clickData,clear_points,point1,point2,file,switch):
+    ctx = dash.callback_context
+    if ctx.triggered[0]['value'] is None:
+        raise PreventUpdate
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    if trigger_id == 'clear_points':
+        return ['no point', 'no point', file]
+    elif clickData != None and switch:
+        index = clickData['points'][0]['pointIndex']
+        if point1 == 'no point':
+            return [index, no_update, file]
+        elif point2 == 'no point':
+            return [no_update, index, file]
+        else:
+            return ['no point', 'no point', file]
+    else:
+        raise PreventUpdate
+
+# generate dash components to display scan parameters
+def generate_param_components(params):
+    param_components = []
+    for factor in params:
+        label = html.Div(children=params[factor]['label'], style={'width':'180px'})
+        value = html.Div(children=params[factor]['value'], style={'width':'250px'})
+        param_components.append(html.Div(children=[label,value],className='centered_row'))
+    return html.Div(children=param_components,className='left_row')
+
+
 # remove AC noise (fixed frequency) from linear and cyclic voltammetric data
 # Filter: IIR notch
 Samplingrates = {"2.5Hz":2.5, "5Hz":5.0, "10Hz":10.0, "15Hz":15.0,
