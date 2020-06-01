@@ -42,8 +42,7 @@ def directory_and_scan_selection():
                 style={'paddingTop':'15px','width':'200px','overflowWrap':'break-word'}),
             dbc.Tooltip('current working directory',target='directory_text'),
             html.Button( id='change_directory_button',
-                style={'fontSize':'xx-large','border': '0',
-                       'marginLeft':'10px'},
+                style={'fontSize':'xx-large','border': '0','padding':'0 10px'},
                 children=u"\U0001F5C1"),
             dbc.Tooltip('change working directory and/or delete files/folders',target='change_directory_button'),
             dcc.Store('directory_popup_placeholder1'), #used to open popup
@@ -96,8 +95,7 @@ def directory_and_scan_selection():
                     ]
             ),
         html.Button(id='upload_button',
-            style={'fontSize':'xx-large','border': '0',
-                   'marginLeft':'10px'},
+            style={'fontSize':'xx-large','border': '0','padding':'0 10px'},
             children=u"\U000021A5"),
         dbc.Tooltip('upload files',target='upload_button'),
         dcc.Store(id='upload_popup_placeholder1'),
@@ -124,8 +122,7 @@ def directory_and_scan_selection():
                 dbc.ModalFooter('Include data .csv file as well as the measurement parameters .txt file!')
                 ]),
         html.Button(id='download_button',
-            style={'fontSize':'xx-large','border': '0',
-                   'marginLeft':'10px'},
+            style={'fontSize':'xx-large','border': '0','padding':'0 10px'},
             children=u"\U00002913"),
         dbc.Tooltip('download files',target='download_button'),
         dcc.Store(id='download_popup_placeholder1'),
@@ -172,7 +169,21 @@ def directory_and_scan_selection():
                         ]),
                 dbc.ModalFooter()
                 ]),
+        daq.BooleanSwitch(id="theme_switch",vertical=True),
+        html.Label(htmlFor='theme_switch',
+            children='Theme'),
+        dbc.Tooltip('Changes colors of plot for display on white background when downloaded',target="theme_switch")
         ])
+
+@app.callback(
+    Output('voltammogram_graph_file6','data'),
+    [Input('theme_switch','on')],
+    [State('voltammogram_graph_file','data')])
+def change_plot_theme(on,file):
+    if on != None:
+        return file
+    else:
+        raise PreventUpdate
 
 @app.callback(
     [Output('scan_selector_value_update_acknowledged','data'),
@@ -181,7 +192,7 @@ def directory_and_scan_selection():
     [Input('scan_selector','value')],
     [State('scan_selector_value_update','data'),
      State('scan_selector_value_update_acknowledged','data')])
-def update_cleaning_time(value, update, update_acknowledged):
+def select_scan(value, update, update_acknowledged):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate

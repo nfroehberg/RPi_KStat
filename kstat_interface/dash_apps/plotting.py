@@ -26,6 +26,23 @@ import peakutils as pu
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
 
+default_theme = {'font_color':'white',
+                 'bg_color':'rgba(0,0,0,0)',
+                 'current_color':'rgb(155,240,255)',
+                 'baseline_color':'rgb(0,180,0)',
+                 'auto_peak_color':'rgb(255,150,0)',
+                 'manual_peak_color':'rgb(255,0,0)',
+                 'grid_color':'black',
+                 }
+download_theme = {'font_color':'black',
+                 'bg_color':'white',
+                 'current_color':'rgb(0,30,140)',
+                 'baseline_color':'rgb(0,180,0)',
+                 'auto_peak_color':'rgb(255,150,0)',
+                 'manual_peak_color':'rgb(255,0,0)',
+                 'grid_color':'rgb(200,200,200)',
+                 }
+                 
 def plot_scan():
     return html.Div(id='voltammogram_graph_container',
         className='voltammogramm',
@@ -69,29 +86,41 @@ def plot_scan():
             dcc.Store(id='voltammogram_graph_file3'),
             dcc.Store(id='voltammogram_graph_file4'),
             dcc.Store(id='voltammogram_graph_file5'),
+            dcc.Store(id='voltammogram_graph_file6'),
             dcc.Store(id='voltammogram_point1',data='no point'),
             dcc.Store(id='voltammogram_point2',data='no point'),
             dcc.Store(id='clear_points'),
+            dcc.Store(id='scan_settings_storage'),
+            dcc.Store(id='copy_settings_placeholder'),
             ]
         )
         
 @app.callback(
     [Output('voltammogram_graph','figure'),
+     Output('voltammogram_graph','config'),
      Output('scan_parameters_collapse','children'),
      Output('noise_filter_container','style'),
-     Output('peak_file_data','data')],
-    [Input('voltammogram_graph_file','data'),
-     Input('voltammogram_graph_file2','data'),
+     Output('peak_file_data','data'),
+     Output('scan_settings_storage','data')],
+    [Input('voltammogram_graph_file2','data'),
      Input('voltammogram_graph_file3','data'),
      Input('voltammogram_graph_file4','data'),
-     Input('voltammogram_graph_file5','data')],
+     Input('voltammogram_graph_file5','data'),
+     Input('voltammogram_graph_file6','data')],
      [State('voltammogram_point1','data'),
-      State('voltammogram_point2','data')])
-def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
+      State('voltammogram_point2','data'),
+      State('voltammogram_graph','config'),
+      State('theme_switch','on')])
+def update_plot_scan(file2,file3,file4,file5,file6,point1,point2,graph_config,theme_switch):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if theme_switch:
+        theme = download_theme
+    else:
+        theme = default_theme
     
     if trigger_id == 'voltammogram_graph_file2': # triggered by noise filter button
         file = file2
@@ -99,18 +128,24 @@ def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
         file = file3
     elif trigger_id == 'voltammogram_graph_file4': # triggered by peak detection update
         file = file4
-    elif trigger_id == 'voltammogram_graph_file5': # triggered by click on plot
+    elif trigger_id == 'voltammogram_graph_file5': # triggered by click on plot or dropdown selector
         file = file5
+    elif trigger_id == 'voltammogram_graph_file6': # triggered by theme change
+        file = file6
     
-    params = get_parameters(file)
+    print('Plotting', file)
+    
+    params,scan_settings = get_parameters(file)
     collapse_params = generate_param_components(params)
     df = pd.read_csv(file)
     root.flush()
     config = literal_eval(str(root.config))
     graph_title = file.replace(str(root.working_directory),'').replace('.csv','')
     
+    graph_config['toImageButtonOptions'] = {'format':'png','filename':graph_title,'width':900,'height':600,'scale':2}
+    
     x_data = df.potential
-    plot_data=[{'x':x_data,'marker':{'color':'rgb(155,240,255)'},'name':'current'}]
+    plot_data=[{'x':x_data,'marker':{'color':theme['current_color']},'name':'current'}]
     
     noise_filter_button = config['noise_filter_button']['children']
     noise_frequency = config['noise_frequency_input']['value']
@@ -151,8 +186,17 @@ def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
             scale_factor = -1
         else:
             scale_factor = 1
-            
-        base = pu.baseline(y_data*scale_factor, baseline_polynomial)
+        
+        # Baseline determination
+        baselabel = 'basecurrent_{}'.format(baseline_polynomial)
+        if baselabel in df.columns:
+            base = df[baselabel]
+        else:
+            base = pu.baseline(y_data*scale_factor, baseline_polynomial)
+            df[baselabel] = base
+            df.to_csv(file, index=False)
+        
+        # Peak determination
         peaks = pu.peak.indexes(y_data*scale_factor-base, thres=peak_threshold, min_dist=peak_dist, thres_abs=True)
         peaks_gaussian = pu.peak.interpolate(x_data.values, (y_data*scale_factor-base).values, ind=peaks, width=peak_width)
         peaks_gaussian_indices = []
@@ -168,14 +212,14 @@ def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
             peakfile[1] = peakfile[1] + '{},automatic,{:.0f},{:.2E},\n'.format(graph_title,peaks_x.iloc[i],peak_heights.iloc[i])
         plot_data.append({'x':peaks_x,'y':peaks_y,
                           'mode':'markers+text',
-                          'marker':{'color':'rgb(255,120,0)'},
+                          'marker':{'color':theme['auto_peak_color']},
                           'text':peaks_labels,
-                          'textfont':{'color':'rgb(255,255,255)'},
+                          'textfont':{'color':theme['font_color']},
                           'textposition':'top center',
                           'name':'peak'})
         if config['baseline_switch']['on']:
             plot_data.append({'x':x_data,'y':base*scale_factor,
-                              'marker':{'color':'rgb(0,180,0)'},
+                              'marker':{'color':theme['baseline_color']},
                               'name':'baseline'})
     
     # manual click points
@@ -187,7 +231,7 @@ def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
         y_points = y_data.iloc[points]
         plot_data.append({'x':x_points,'y':y_points,
                           'mode':'markers+text',
-                          'marker':{'color':'rgb(255,0,0)'},
+                          'marker':{'color':theme['manual_peak_color']},
                           'name':'click'})
         if point2 != 'no point':
             # lines to connect points and show horizontal and vertical distance
@@ -195,11 +239,11 @@ def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
             i_diff = abs(y_points.iloc[0]-y_points.iloc[1])
             plot_data.append({'x':[x_points.iloc[0],x_points.iloc[1],x_points.iloc[1]],
                               'y':[y_points.iloc[0],y_points.iloc[0],y_points.iloc[1]],
-                              'mode':'lines','marker':{'color':'rgb(255,0,0)'}})
+                              'mode':'lines','marker':{'color':theme['manual_peak_color']}})
             plot_data.append({'x':[x_points.iloc[0]+((x_points.iloc[1]-x_points.iloc[0])/2),x_points.iloc[1]],
                               'y':[y_points.iloc[0],y_points.iloc[0]+((y_points.iloc[1]-y_points.iloc[0])/2)],
                               'text':['{:.0f} mV'.format(v_diff),'{:.2E} A'.format(i_diff)],
-                              'mode':'text','textfont':{'color':'rgb(255,0,0)'},
+                              'mode':'text','textfont':{'color':theme['manual_peak_color']},
                               'textposition':['bottom center','middle right'],})
             peakfile[1] = peakfile[1] + '{},manual,{:.0f},{:.2E},\n'.format(graph_title,x_points.iloc[1],i_diff)
     
@@ -208,34 +252,35 @@ def update_plot_scan(file,file2,file3,file4,file5,point1,point2):
         'layout':{
             'title':{
                 'text':graph_title,
-                'font':{'color':'white'}},
+                'font':{'color':theme['font_color']}},
             'xaxis':{
                 'title':{
                     'text':'Potential [mV] vs. Ag/AgCl',
-                    'font':{'color':'white'}},
+                    'font':{'color':theme['font_color']}},
                 'autorange':'reversed',
-                'gridcolor':'black',
-                'zerolinecolor':'black',
-                'zerolinewidth':2,
-                'tickfont':{'color':'white'}
+                'gridcolor':theme['grid_color'],
+                'zerolinecolor':theme['grid_color'],
+                'zerolinewidth':3,
+                'tickfont':{'color':theme['font_color']}
                 },
             'yaxis':{
                 'title':{
                     'text':'Current [A]',
-                    'font':{'color':'white'}},
+                    'font':{'color':theme['font_color']}},
                 'autorange':'reversed',
-                'gridcolor':'black',
-                'zerolinecolor':'black',
-                'zerolinewidth':2,
-                'tickfont':{'color':'white'}
+                'gridcolor':theme['grid_color'],
+                'zerolinecolor':theme['grid_color'],
+                'zerolinewidth':3,
+                'tickfont':{'color':theme['font_color']}
                 },
-            'paper_bgcolor':'rgba(0,0,0,0)',
-            'plot_bgcolor':'rgba(0,0,0,0)',
+            'paper_bgcolor':theme['bg_color'],
+            'plot_bgcolor':theme['bg_color'],
             'showlegend':False,
             'autosize':True,
+            'uirevision':file5,
             }
         }
-    return [figure,collapse_params,noise_filter,peakfile]
+    return [figure,graph_config,collapse_params,noise_filter,peakfile,scan_settings]
 
 # if points on graph are clicked, get index. if already two points are selected, remove all
 # if graph file is changed, clear points
@@ -267,14 +312,6 @@ def catch_click(clickData,clear_points,point1,point2,file,switch):
     else:
         raise PreventUpdate
 
-# generate dash components to display scan parameters
-def generate_param_components(params):
-    param_components = []
-    for factor in params:
-        label = html.Div(children=params[factor]['label'], style={'width':'180px'})
-        value = html.Div(children=params[factor]['value'], style={'width':'250px'})
-        param_components.append(html.Div(children=[label,value],className='centered_row'))
-    return html.Div(children=param_components,className='left_row')
 
 
 # remove AC noise (fixed frequency) from linear and cyclic voltammetric data
@@ -327,10 +364,20 @@ labels={'Comment':'Comment','Samplerate':'Sampling Frequency','t_preconditioning
     'start':'Start Potential','stop':'End Potential','n_scans':'Number of Scans','slope':'Slope',
     'step_size':'Step Size','pulse_height':'Pulse Height','period':'Period',
     'width':'Pulse Width','frequency':'Frequency'}
+components={'Comment':'comment_input','Samplerate':'samplefreq_input','t_preconditioning1':'cleaning_time_input',
+    't_preconditioning2':'deposition_time_input','v_preconditioning1':'cleaning_potential_input',
+    'v_preconditioning2':'deposition_potential_input','v1':'vertex_potential_input','v2':'end_potential_input',
+    'start':'start_potential_input','stop':'end_potential_input','n_scans':'n_scans_input','slope':'slope_input',
+    'step_size':'step_size_input','pulse_height':'pulse_height_input','period':'period_input',
+    'width':'pulse_width_input','frequency':'frequency_input'}
 experiment_types={'Cyclic Voltammetry Experiment\n':'Cyclic Voltammetry',
                   'Linear Sweep Voltammetry Experiment\n':'Linear Sweep Voltammetry',
                   'Squarewave Voltammetry Experiment\n':'Squarewave Voltammetry',
                   'Differential Pulse Voltammetry Experiment\n':'Differential Pulse Voltammetry'}
+experiment_values={'Cyclic Voltammetry':'single_cv',
+                  'Linear Sweep Voltammetry':'single_lsv',
+                  'Squarewave Voltammetry':'single_swv',
+                  'Differential Pulse Voltammetry':'single_dpv'}
                   
 # read scan parameters from the .txt file generated by the KStat driver
 def get_parameters(file):
@@ -341,13 +388,41 @@ def get_parameters(file):
     f.close()
     parameters = pd.read_csv(parafile, delim_whitespace=True, engine='python', names=['0','1','2','3'], index_col=0)
     params = {}
+    settings = [{'component':'category_selection','attribute':'value','value':'voltammetry_single'}] # to enable copying of scan parameters to current settings
     params['type'] = {'label':'Type','value':experiment_types[type]}
+    settings.append({'component':'program_selection','attribute':'value','value':experiment_values[params['type']['value']]})
     for factor in factors[type]:
         number = parameters['2'][factor]
+        try:
+            number = int(number)
+        except:
+            pass
         unit = parameters['3'][factor]
+        settings.append({'component':components[factor],'attribute':'value','value':number})
         if unit != None:
-            value = number + ' ' + unit
+            value = str(number) + ' ' + unit
         else:
-            value = number
+            value = str(number)
         params[factor] = {'label':labels[factor],'value':value}
-    return params
+    return (params,settings)
+
+
+# generate dash components to display scan parameters
+def generate_param_components(params):
+    param_components = []
+    for factor in params:
+        label = html.Div(children=params[factor]['label'], style={'width':'180px'})
+        value = html.Div(children=params[factor]['value'], style={'width':'250px'})
+        param_components.append(html.Div(children=[label,value],className='centered_row'))
+    param_components.append(html.Button(id='copy_scan_settings_button',children='Copy Scan Parameters to Current Settings'))
+    return html.Div(children=param_components,className='left_row')
+    
+@app.callback(
+    Output('copy_settings_placeholder','data'),
+    [Input('copy_scan_settings_button','n_clicks')],
+    [State('scan_settings_storage','data')])
+def copy_scan_settings(n_clicks,data):
+    if n_clicks != None:
+        write_config(data)
+    else:
+        raise PreventUpdate

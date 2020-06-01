@@ -202,6 +202,7 @@ if __name__ == '__main__':
             main_directory = str(pathlib.Path(__file__).parent.absolute())
             root.main_directory = main_directory + '/'
             root.data_directory = main_directory + '/data/'
+            root.methods_directory = main_directory + '/methods/'
             root.download_directory = main_directory + '/user_downloads/'
             clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
             root.working_directory = root.data_directory

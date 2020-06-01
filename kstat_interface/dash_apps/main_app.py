@@ -91,7 +91,10 @@ def main():
                     className='centered_row',
                     children=[
                         category_selection(),
-                        program_selection()]),
+                        html.Div(style={'width':'5%'}),
+                        program_selection(),
+                        html.Div(style={'width':'5%'}),
+                        config_selection()]),
                 html.Div(
                     className='left_row',
                     children=[
