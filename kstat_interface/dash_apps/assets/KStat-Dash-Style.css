@@ -23,6 +23,7 @@ html {
 	display:flex;
 	justify-content:center;
 	align-items:center;
+    vertical-align: middle;
     flex-wrap:wrap;
 }
 
@@ -53,12 +54,16 @@ html {
   .program_dropdown{width:30%;}
   .main_program{width:70%;}
   .voltammogramm{height:80vh;}
+  .stirr_speed_slider{width:50%}
+  .stirr_purge_switch{width:25%}
 }
 
 @media (orientation: portrait) {
   .program_dropdown{width:100%;}
   .main_program{width:90%;}
   .voltammogramm{height:40vh;}
+  .stirr_speed_slider{width:100%}
+  .stirr_purge_switch{width:100%}
 }
 
 .progress_label {

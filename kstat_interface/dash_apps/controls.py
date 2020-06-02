@@ -32,13 +32,15 @@ light_theme={
 
 def purge_switch():
     return html.Div(id='purge_switch_container',
-        className='centered_row',
+        className='centered_row stirr_purge_switch',
         children=[
-            daq.BooleanSwitch(id="purge_switch",style={'width':'90px'}),
+            html.Div(style={'width':'50%'},
+                children=daq.BooleanSwitch(id="purge_switch",style={'width':'50px','float':'right'})),
+            html.Div(style={'width':'5%'}),
             html.Label(
                 htmlFor='purge_switch',
                 children='Purge',
-                style={'width':'90px'}),
+                style={'width':'45%','textAlign':'left'}),
             dcc.Store(id='purge_switch_on_update', data=1),
             dcc.Store(id='purge_switch_on_update_acknowledged', data=2),]
     )
@@ -59,13 +61,15 @@ def control_purging(switch, update, update_acknowledged):
   
 def stirr_switch():
     return html.Div(id='stirr_switch_container',
-        className='centered_row',
+        className='centered_row stirr_purge_switch',
         children=[
             html.Label(
                 htmlFor='stirr_switch',
                 children='Stirr',
-                style={'width':'90px','textAlign':'right'}),
-            daq.BooleanSwitch(id="stirr_switch",style={'width':'90px'}),
+                style={'width':'45%','textAlign':'right'}),
+            html.Div(style={'width':'5%'}),
+            html.Div(style={'width':'50%'},
+                children=daq.BooleanSwitch(id="stirr_switch",style={'width':'50px','float':'left'})),
             dcc.Store(id='stirr_switch_on_update', data=1),
             dcc.Store(id='stirr_switch_on_update_acknowledged', data=2),]
     )
@@ -85,7 +89,8 @@ def control_stirring(switch, update, update_acknowledged):
 
 def stirr_speed_slider():
     return html.Div(id='stirr_speed_slider_container',
-        style={'width':'50%','display':'flex','flexWrap':'wrap'},
+        style={'display':'flex','flexWrap':'wrap'},
+        className='stirr_speed_slider',
         children=[
             html.Div(style={'width':'100%','height':'30px'}),
             html.Div(

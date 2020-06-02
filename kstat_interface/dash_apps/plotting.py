@@ -87,6 +87,7 @@ def plot_scan():
             dcc.Store(id='voltammogram_graph_file4'),
             dcc.Store(id='voltammogram_graph_file5'),
             dcc.Store(id='voltammogram_graph_file6'),
+            dcc.Store(id='voltammogram_graph_file7'),
             dcc.Store(id='voltammogram_point1',data='no point'),
             dcc.Store(id='voltammogram_point2',data='no point'),
             dcc.Store(id='clear_points'),
@@ -117,11 +118,6 @@ def update_plot_scan(file2,file3,file4,file5,file6,point1,point2,graph_config,th
         raise PreventUpdate
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
     
-    if theme_switch:
-        theme = download_theme
-    else:
-        theme = default_theme
-    
     if trigger_id == 'voltammogram_graph_file2': # triggered by noise filter button
         file = file2
     elif trigger_id == 'voltammogram_graph_file3': # triggered by noise frequency update
@@ -133,6 +129,46 @@ def update_plot_scan(file2,file3,file4,file5,file6,point1,point2,graph_config,th
     elif trigger_id == 'voltammogram_graph_file6': # triggered by theme change
         file = file6
     
+    if theme_switch:
+        theme = download_theme
+    else:
+        theme = default_theme
+    graph_title = file.replace(str(root.working_directory),'').replace('.csv','')
+    layout = {
+            'title':{
+                'text':graph_title,
+                'font':{'color':theme['font_color']}},
+            'xaxis':{
+                'title':{
+                    'text':'Potential [mV] vs. Ag/AgCl',
+                    'font':{'color':theme['font_color']}},
+                'autorange':'reversed',
+                'gridcolor':theme['grid_color'],
+                'zerolinecolor':theme['grid_color'],
+                'zerolinewidth':3,
+                'tickfont':{'color':theme['font_color']}
+                },
+            'yaxis':{
+                'title':{
+                    'text':'Current [A]',
+                    'font':{'color':theme['font_color']}},
+                'autorange':'reversed',
+                'gridcolor':theme['grid_color'],
+                'zerolinecolor':theme['grid_color'],
+                'zerolinewidth':3,
+                'tickfont':{'color':theme['font_color']}
+                },
+            'paper_bgcolor':theme['bg_color'],
+            'plot_bgcolor':theme['bg_color'],
+            'showlegend':False,
+            'autosize':True,
+            'uirevision':file5,
+            }
+            
+    
+    if file == '':
+        return[{'data':'','layout':layout},no_update,'',no_update,'','']
+    
     print('Plotting', file)
     
     params,scan_settings = get_parameters(file)
@@ -140,7 +176,6 @@ def update_plot_scan(file2,file3,file4,file5,file6,point1,point2,graph_config,th
     df = pd.read_csv(file)
     root.flush()
     config = literal_eval(str(root.config))
-    graph_title = file.replace(str(root.working_directory),'').replace('.csv','')
     
     graph_config['toImageButtonOptions'] = {'format':'png','filename':graph_title,'width':900,'height':600,'scale':2}
     
@@ -249,36 +284,7 @@ def update_plot_scan(file2,file3,file4,file5,file6,point1,point2,graph_config,th
     
     figure={
         'data':plot_data,
-        'layout':{
-            'title':{
-                'text':graph_title,
-                'font':{'color':theme['font_color']}},
-            'xaxis':{
-                'title':{
-                    'text':'Potential [mV] vs. Ag/AgCl',
-                    'font':{'color':theme['font_color']}},
-                'autorange':'reversed',
-                'gridcolor':theme['grid_color'],
-                'zerolinecolor':theme['grid_color'],
-                'zerolinewidth':3,
-                'tickfont':{'color':theme['font_color']}
-                },
-            'yaxis':{
-                'title':{
-                    'text':'Current [A]',
-                    'font':{'color':theme['font_color']}},
-                'autorange':'reversed',
-                'gridcolor':theme['grid_color'],
-                'zerolinecolor':theme['grid_color'],
-                'zerolinewidth':3,
-                'tickfont':{'color':theme['font_color']}
-                },
-            'paper_bgcolor':theme['bg_color'],
-            'plot_bgcolor':theme['bg_color'],
-            'showlegend':False,
-            'autosize':True,
-            'uirevision':file5,
-            }
+        'layout':layout
         }
     return [figure,graph_config,collapse_params,noise_filter,peakfile,scan_settings]
 

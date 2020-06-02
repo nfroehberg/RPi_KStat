@@ -205,7 +205,15 @@ if __name__ == '__main__':
             root.methods_directory = main_directory + '/methods/'
             root.download_directory = main_directory + '/user_downloads/'
             clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
-            root.working_directory = root.data_directory
+            try:
+                if str(root.main_directory) in str(root.working_directory):
+                    pass
+                else:
+                    print('folder moved, resetting working directory')
+                    root.working_directory = root.data_directory
+            except:
+                print('initialize working directory')
+                root.working_directory = root.data_directory
             root.program='measurement'
             initialize_config(root)
 

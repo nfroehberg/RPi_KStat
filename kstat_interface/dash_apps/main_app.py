@@ -65,6 +65,7 @@ def main():
                         stop(),
                         ]
                     ),
+                html.Div(style={'height':'10px'}),
                 html.Div(
                     className='centered_row',
                     children=[
@@ -73,6 +74,7 @@ def main():
                         stirr_switch(),
                         ]
                     ),
+                html.Div(style={'height':'10px'}),
                 html.Div(
                     className='centered_row',
                     children=[

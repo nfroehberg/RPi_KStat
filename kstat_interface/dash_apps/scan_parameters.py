@@ -32,7 +32,7 @@ light_theme={
 def scan_parameters():
     return html.Div(id='scan_parameters',
         children=[
-            html.Div(className='left_row',
+            html.Div(className='centered_row',
                 children=[
                     noise_filter(),
                     html.Button(children='Scan Parameters',
