@@ -217,6 +217,11 @@ if __name__ == '__main__':
                 print('initialize working directory')
                 root.working_directory = root.data_directory
             root.program='measurement'
+            try:
+                config=literal_eval(str(root.config))
+                purge_switch = config['purge_switch']
+            except:
+                root.config = initial_config
             initialize_config(root)
 
             app.layout = setup_layout()
