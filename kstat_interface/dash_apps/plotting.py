@@ -95,7 +95,7 @@ def plot_scan():
             dcc.Store(id='copy_settings_placeholder'),
             ]
         )
-        
+   
 @app.callback(
     [Output('voltammogram_graph','figure'),
      Output('voltammogram_graph','config'),
@@ -103,32 +103,24 @@ def plot_scan():
      Output('noise_filter_container','style'),
      Output('peak_file_data','data'),
      Output('scan_settings_storage','data')],
-    [Input('voltammogram_graph_file2','data'),
-     Input('voltammogram_graph_file3','data'),
-     Input('voltammogram_graph_file4','data'),
-     Input('voltammogram_graph_file5','data'),
-     Input('voltammogram_graph_file6','data')],
-     [State('voltammogram_point1','data'),
-      State('voltammogram_point2','data'),
-      State('voltammogram_graph','config'),
-      State('theme_switch','on')])
-def update_plot_scan(file2,file3,file4,file5,file6,point1,point2,graph_config,theme_switch):
+    [Input('voltammogram_graph_file2','modified_timestamp'),
+     Input('voltammogram_graph_file3','modified_timestamp'),
+     Input('voltammogram_graph_file4','modified_timestamp'),
+     Input('voltammogram_graph_file5','modified_timestamp'),
+     Input('voltammogram_graph_file6','modified_timestamp')],
+    [State('voltammogram_graph_file','data'),
+     State('voltammogram_point1','data'),
+     State('voltammogram_point2','data'),
+     State('voltammogram_graph','config'),
+     State('theme_switch','on')])
+def update_plot_scan(file2,file3,file4,file5,file6,file,point1,point2,graph_config,theme_switch):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
     
-    if trigger_id == 'voltammogram_graph_file2': # triggered by noise filter button
-        file = file2
-    elif trigger_id == 'voltammogram_graph_file3': # triggered by noise frequency update
-        file = file3
-    elif trigger_id == 'voltammogram_graph_file4': # triggered by peak detection update
-        file = file4
-    elif trigger_id == 'voltammogram_graph_file5': # triggered by click on plot or dropdown selector
-        file = file5
-    elif trigger_id == 'voltammogram_graph_file6': # triggered by theme change
-        file = file6
-    
+    if file == None:
+        raise PreventUpdate
     if theme_switch:
         theme = download_theme
     else:
@@ -295,26 +287,26 @@ def update_plot_scan(file2,file3,file4,file5,file6,point1,point2,graph_config,th
      Output('voltammogram_point2','data'),
      Output('voltammogram_graph_file5','data')],
     [Input('voltammogram_graph','clickData'),
-     Input('clear_points','data')],
+     Input('clear_points','modified_timestamp')],
     [State('voltammogram_point1','data'),
      State('voltammogram_point2','data'),
-     State('voltammogram_graph_file','data'),
      State('manual_peak_detection','on')])
-def catch_click(clickData,clear_points,point1,point2,file,switch):
+def catch_click(clickData,clear_points,point1,point2,switch):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
     if trigger_id == 'clear_points':
-        return ['no point', 'no point', file]
+        return ['no point', 'no point', time()]
     elif clickData != None and switch:
         index = clickData['points'][0]['pointIndex']
         if point1 == 'no point':
-            return [index, no_update, file]
+            return [index, no_update, time()]
         elif point2 == 'no point':
-            return [no_update, index, file]
+            return [no_update, index, time()]
         else:
-            return ['no point', 'no point', file]
+            return ['no point', 'no point', time()]
     else:
         raise PreventUpdate
 

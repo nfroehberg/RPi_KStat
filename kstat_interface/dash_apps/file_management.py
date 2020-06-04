@@ -191,11 +191,10 @@ def directory_and_scan_selection():
 
 @app.callback(
     Output('voltammogram_graph_file6','data'),
-    [Input('theme_switch','on')],
-    [State('voltammogram_graph_file','data')])
-def change_plot_theme(on,file):
+    [Input('theme_switch','on')])
+def change_plot_theme(on):
     if on != None:
-        return file
+        return time()
     else:
         raise PreventUpdate
 
@@ -211,13 +210,12 @@ def select_scan(value, update, update_acknowledged):
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
     
-    print(value)
     if update == update_acknowledged:
         write_config([{'component':'scan_selector',
                        'attribute':'value','value':value}])
-        return [no_update, value, True]
+        return [no_update, value, time()]
     else:
-        return [update, value, True]
+        return [update, value, time()]
 
 @app.callback(
     [Output('directory_selection','options'),

@@ -66,16 +66,15 @@ def scan_parameters():
 
 @app.callback(
     Output('voltammogram_graph_file4','data'),
-    [Input('peak_threshold_input_graph_update','data'),
-     Input('peak_threshold_range_graph_update','data'),
-     Input('peak_distance_input_graph_update','data'),
-     Input('baseline_polynomial_input_graph_update','data'),
-     Input('baseline_switch_graph_update','data'),
-     Input('peak_detection_switch_graph_update','data'),
-     Input('peak_width_input_graph_update','data'),],
-    [State('voltammogram_graph_file','data')])
-def update_graph_peak(input1,input2,input3,input4,input5,input6,input7,file):
-    return file
+    [Input('peak_threshold_input_graph_update','modified_timestamp'),
+     Input('peak_threshold_range_graph_update','modified_timestamp'),
+     Input('peak_distance_input_graph_update','modified_timestamp'),
+     Input('baseline_polynomial_input_graph_update','modified_timestamp'),
+     Input('baseline_switch_graph_update','modified_timestamp'),
+     Input('peak_detection_switch_graph_update','modified_timestamp'),
+     Input('peak_width_input_graph_update','modified_timestamp'),])
+def update_graph_peak(input1,input2,input3,input4,input5,input6,input7):
+    return time()
 
 @app.callback(
      Output('peak_file_placeholder','data'),

@@ -197,6 +197,7 @@ if __name__ == '__main__':
             try:
                 program=root.program
             except:
+                print('blah')
                 root.program = 'startup'
                 
             main_directory = str(pathlib.Path(__file__).parent.absolute())
@@ -220,7 +221,8 @@ if __name__ == '__main__':
             try:
                 config=literal_eval(str(root.config))
                 purge_switch = config['purge_switch']
-            except:
+            except Exception as e:
+                print('overwriting config', e)
                 root.config = initial_config
             initialize_config(root)
 
