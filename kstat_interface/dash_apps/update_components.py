@@ -138,7 +138,7 @@ factor_labels=factors
 
 @app.callback(
     update_outputs,
-    [Input('update_timestamp','data')],
+    [Input('update_timestamp','modified_timestamp')],
     update_states)
 def update_config(timestamp,*factors):
     try:
