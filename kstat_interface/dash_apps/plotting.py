@@ -54,7 +54,7 @@ def plot_scan():
                         'hoverClosestCartesian','hoverCompareCartesian',
                         'toggleHover','toggleSpikelines'],
                         'responsive':True,'autosizable':True,
-                        'showAxisDragHandle':True,'displaylogo':False,
+                        'showAxisDragHandles':True,'displaylogo':False,
                         'scrollZoom':True,'editable':True
                         },
                 figure={'layout':{
