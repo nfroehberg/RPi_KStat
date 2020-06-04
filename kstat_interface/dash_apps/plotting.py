@@ -107,13 +107,14 @@ def plot_scan():
      Input('voltammogram_graph_file3','modified_timestamp'),
      Input('voltammogram_graph_file4','modified_timestamp'),
      Input('voltammogram_graph_file5','modified_timestamp'),
-     Input('voltammogram_graph_file6','modified_timestamp')],
+     Input('voltammogram_graph_file6','modified_timestamp'),
+     Input('voltammogram_graph_file7','modified_timestamp')],
     [State('voltammogram_graph_file','data'),
      State('voltammogram_point1','data'),
      State('voltammogram_point2','data'),
      State('voltammogram_graph','config'),
      State('theme_switch','on')])
-def update_plot_scan(file2,file3,file4,file5,file6,file,point1,point2,graph_config,theme_switch):
+def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,graph_config,theme_switch):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
@@ -154,7 +155,7 @@ def update_plot_scan(file2,file3,file4,file5,file6,file,point1,point2,graph_conf
             'plot_bgcolor':theme['bg_color'],
             'showlegend':False,
             'autosize':True,
-            'uirevision':file5,
+            'uirevision':file7,#uirevision triggered only when file is changed using the dropdown
             }
             
     
@@ -285,7 +286,8 @@ def update_plot_scan(file2,file3,file4,file5,file6,file,point1,point2,graph_conf
 @app.callback(
     [Output('voltammogram_point1','data'),
      Output('voltammogram_point2','data'),
-     Output('voltammogram_graph_file5','data')],
+     Output('voltammogram_graph_file5','data'),
+     Output('voltammogram_graph_file7','data')],
     [Input('voltammogram_graph','clickData'),
      Input('clear_points','modified_timestamp')],
     [State('voltammogram_point1','data'),
@@ -298,15 +300,15 @@ def catch_click(clickData,clear_points,point1,point2,switch):
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
     
     if trigger_id == 'clear_points':
-        return ['no point', 'no point', time()]
+        return ['no point', 'no point', no_update, time()]
     elif clickData != None and switch:
         index = clickData['points'][0]['pointIndex']
         if point1 == 'no point':
-            return [index, no_update, time()]
+            return [index, no_update, time(), no_update]
         elif point2 == 'no point':
-            return [no_update, index, time()]
+            return [no_update, index, time(), no_update]
         else:
-            return ['no point', 'no point', time()]
+            return ['no point', 'no point', time(), no_update]
     else:
         raise PreventUpdate
 
