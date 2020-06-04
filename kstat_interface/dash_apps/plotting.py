@@ -428,7 +428,7 @@ def generate_param_components(params):
     [Input('copy_scan_settings_button','n_clicks')],
     [State('scan_settings_storage','data')])
 def copy_scan_settings(n_clicks,data):
-    if n_clicks != None:
+    if n_clicks != None and data != None:
         write_config(data)
     else:
         raise PreventUpdate
