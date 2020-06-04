@@ -96,7 +96,7 @@ def directory_and_scan_selection():
                                     dcc.ConfirmDialog(id='delete_directory_confirmation',
                                         message='Delete the current working directory and all its content?'),
                                     dcc.ConfirmDialog(id='delete_directory_error',
-                                        message='The "data" directory cannot be deleted.'),
+                                        message='The main data directory cannot be deleted.'),
                                     html.Button(children='cancel',id='directory_cancel_button', 
                                         style={'padding':'5px','width':'23%','lineHeight':'20px','height':'60px'}),
                                     html.Button(children='confirm',id='directory_confirm_button', 
@@ -235,6 +235,7 @@ def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_fi
     root.flush()
     directory_list = glob('{}*/'.format(root.working_directory))
 	#don't allow user to go higher than the base data directory
+    print(root.working_directory,root.data_directory)
     if root.working_directory != root.data_directory:
         directory_options=[{'label':u"\U00002B11"+' parent directory','value':str(root.working_directory)+'parent'}]
     else:
@@ -254,7 +255,7 @@ def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_fi
         file_options.append({'label':label,'value':file})
     write_config([{'component':'scan_selector','attribute':'options','value':file_options}])
     
-    label=str(root.working_directory).replace(str(root.main_directory),'').strip('/')
+    label=str(root.working_directory).replace(str(root.parent_directory),'').strip('/')
     
     return[directory_options, file_options, label]
 
@@ -369,10 +370,10 @@ def select_directory(dir):
             root.working_directory = p_dir[0:p_dir.rfind('/')+1]
         else:
             root.working_directory = dir
-        label=str(root.working_directory).replace(str(root.main_directory),'').strip('/')
+        label=str(root.working_directory).replace(str(root.parent_directory),'').strip('/')
         return [label, time()]
     else:
-        label=str(root.working_directory).replace(str(root.main_directory),'').strip('/')
+        label=str(root.working_directory).replace(str(root.parent_directory),'').strip('/')
         return [label, no_update]
 
 # select/deselect all files in directory dialog to delete
@@ -521,7 +522,7 @@ def open_close_download_popup(placeholder1,placeholder2):
             label=file.replace(str(root.working_directory),'').replace('.csv','')
             file_options.append({'label':label,'value':file})
         
-        label=str(root.working_directory).replace(str(root.main_directory),'').strip('/')
+        label=str(root.working_directory).replace(str(root.parent_directory),'').strip('/')
         
         return [True, directory_options, file_options, label]
     elif trigger_id == 'download_popup_placeholder2':
@@ -667,7 +668,7 @@ def open_close_upload_popup(placeholder1,placeholder2):
         trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
         
     if trigger_id == 'upload_popup_placeholder1':
-        header = 'Upload files to ' + (str(root.working_directory).replace(str(root.main_directory),'')).rstrip('/')
+        header = 'Upload files to ' + (str(root.working_directory).replace(str(root.parent_directory),'')).rstrip('/')
         return [True, header]
     elif trigger_id == 'upload_popup_placeholder2':
         return [False, no_update]

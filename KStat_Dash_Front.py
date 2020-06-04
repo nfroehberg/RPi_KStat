@@ -43,12 +43,30 @@ def initialize_redis():
     redis_host,redis_port = redis_config.get_config()
     global root
     root = Root(host=redis_host, port=redis_port, db=0)
-
-def get_program():
-    program=str(root.program)
-    if program == 'startup':
-        program = None
-    return program
+    
+def initialize_directories():  
+    main_directory = str(pathlib.Path(__file__).parent.absolute())
+    root.main_directory = main_directory + '/'
+    p_dir = str(root.main_directory).rstrip('/')
+    p_dir = p_dir[0:p_dir.rfind('/')+1]
+    root.parent_directory = p_dir
+    root.data_directory = p_dir + 'KStat_Data/'
+    if not os.path.exists(str(root.data_directory)):
+        os.mkdir(str(root.data_directory))
+    root.methods_directory = main_directory + '/methods/'
+    root.download_directory = main_directory + '/user_downloads/'
+    if not os.path.exists(str(root.download_directory)):
+        os.mkdir(str(root.download_directory))
+    clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
+    try:
+        if str(root.parent_directory) in str(root.working_directory):
+            pass
+        else:
+            print('folder moved, resetting working directory')
+            root.working_directory = root.data_directory
+    except:
+        print('initialize working directory')
+        root.working_directory = root.data_directory
     
 def clearDirectory(dir):
     for filename in os.listdir(dir):
@@ -118,7 +136,14 @@ initial_config={
     'scan_selector':{'options':[],'value':''},
     }
 
-def initialize_config(root):
+def initialize_config():
+    
+    try:
+        config=literal_eval(str(root.config))
+        purge_switch = config['start_button']
+    except Exception as e:
+        print('initializing config', e)
+        root.config = initial_config
     for component in initial_config.keys():
         try:
             root_config_component = root.config[component]
@@ -166,7 +191,6 @@ def setup_layout():
                                     id='reboot_button')])))
                     ])
 
-
 # Shut down the RPi
 @app.callback(
     Output('power_button','color'),
@@ -194,37 +218,8 @@ if __name__ == '__main__':
     while True:
         try:
             initialize_redis()
-            try:
-                program=root.program
-            except:
-                print('blah')
-                root.program = 'startup'
-                
-            main_directory = str(pathlib.Path(__file__).parent.absolute())
-            root.main_directory = main_directory + '/'
-            root.data_directory = main_directory + '/data/'
-            root.methods_directory = main_directory + '/methods/'
-            root.download_directory = main_directory + '/user_downloads/'
-            if not os.path.exists(str(root.download_directory)):
-                os.mkdir(str(root.download_directory))
-            clearDirectory(str(root.download_directory)) # empty user download directory on reboot to prevent memory filling up
-            try:
-                if str(root.main_directory) in str(root.working_directory):
-                    pass
-                else:
-                    print('folder moved, resetting working directory')
-                    root.working_directory = root.data_directory
-            except:
-                print('initialize working directory')
-                root.working_directory = root.data_directory
-            root.program='measurement'
-            try:
-                config=literal_eval(str(root.config))
-                purge_switch = config['purge_switch']
-            except Exception as e:
-                print('overwriting config', e)
-                root.config = initial_config
-            initialize_config(root)
+            initialize_directories()
+            initialize_config()
 
             app.layout = setup_layout()
             app.run_server(debug=False, host='voltammetrypi.local', port=8080)
