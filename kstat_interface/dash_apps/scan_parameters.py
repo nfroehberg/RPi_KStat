@@ -43,7 +43,8 @@ def scan_parameters():
                         id='peak_detection_button',
                         style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
                     ]),
-            dbc.Collapse(id='scan_parameters_collapse'),
+            dbc.Collapse(id='scan_parameters_collapse',
+                        children=html.Button(id='copy_scan_settings_button',children='Copy Scan Parameters to Current Settings')),
             dbc.Collapse(id='peak_detection_collapse',
                 className='left_row',
                 children=[
