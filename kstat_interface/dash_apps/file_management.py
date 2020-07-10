@@ -246,19 +246,26 @@ def update_dropdowns(update_dirs,update_files,initialize_files,new_dir,delete_fi
         label = directory.replace(str(root.working_directory),'').strip('/')
         label = u"\U0001F5C1" + " " + label
         directory_options.append({'label':label,'value':directory})
-	
+    directory_options.sort(key=label_sort)
+    
 	#generate list of csv files for scan selector
     file_list = glob('{}*.csv'.format(root.working_directory))
     file_options = []
     for file in file_list:
         label=file.replace(str(root.working_directory),'').replace('.csv','')
         file_options.append({'label':label,'value':file})
+    file_options.sort(key=label_sort)
+    
     write_config([{'component':'scan_selector','attribute':'options','value':file_options}])
     
     label=str(root.working_directory).replace(str(root.parent_directory),'').strip('/')
     
     return[directory_options, file_options, label]
 
+# function for alphatical sorting of file/directory lists by label
+def label_sort(option_dict):
+    return option_dict['label']
+	
 # reload list of files on page reload
 @app.callback(
     [Output('files_initialization','data'),
