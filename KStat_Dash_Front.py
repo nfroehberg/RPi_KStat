@@ -22,6 +22,7 @@ import kstat_interface.dash_apps.main_app as main_app
 from kstat_interface.dash_apps.app import app
 from kstat_interface import redis_config
 from subprocess import call
+from socket import gethostname
 import pathlib
 import os, shutil
 # to add a component that communicates with the backend:
@@ -222,7 +223,7 @@ if __name__ == '__main__':
             initialize_config()
 
             app.layout = setup_layout()
-            app.run_server(debug=False, host='voltammetrypi.local', port=8080)
+            app.run_server(debug=False, host='{}.local'.format(gethostname()), port=8080)
         except Exception as e:
             print(e)
             sleep(1)
