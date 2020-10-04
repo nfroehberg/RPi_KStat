@@ -1,0 +1,45 @@
+Fresh install of Raspberry Pi OS
+Update
+Sudo raspi-config
+Change hostname to voltammetrypi, password to eigentlich!
+Enable ssh (optional i2c & serial)
+
+reboot
+Install RaspAP (https://raspap.com/)
+curl -sL https://install.raspap.com | bash -s -- --yes
+set up hotspot immediately without a reboot!
+bowser <hostname>.local admin, secret
+configure hotspot SSID, password, country code and activate WiFi client AP mode
+reboot
+check that RaspAP interface is available at voltammetrypi.local from devices connected to the hotspot as well as devices in the same network the AP uses as a client
+install packages
+pip3 install scipy numpy peakutils matplotlib pandas plotly dash dash-daq dash-bootstrap-components redisworks
+sudo apt install libatlas-base-dev redis git screen
+sudo cp /etc/redis/redis.conf /etc/redis/6379.conf
+sudo nano /etc/redis/6379.conf
+modify 
+save 900 1
+save 300 10
+save 60 10000
+to
+save 60 1
+save 30 10
+save 10 10000
+
+git config --global user.email “”
+git config --global user.name “”
+
+git clone https://github.com/nfroehberg/RPi_KStat.git
+sudo nano /etc/rc.local
+
+add to beginning:
+exec 1>/tmp/rc.local.log 2>&1  # send stdout and stderr from rc.local to a log file
+set -x                         # tell sh to display commands before execution
+add to end before exit 0
+# start redis server and python scripts for KStat Dash interface
+sleep 5
+redis-server /etc/redis/6379.conf
+#su - pi -c "screen -dmS dash_back -L -Logfile RPi_KStat/back.log python3 RPi_KStat/KStat_Dash_Back.py"
+su - pi -c "screen -dmS dash_back python3 RPi_KStat/KStat_Dash_Back.py"
+#su - pi -c "screen -dmS dash_front -L -Logfile RPi_KStat/front.log python3 RPi_KStat/KStat_Dash_Front.py"
+su - pi -c "screen -dmS dash_front python3 RPi_KStat/KStat_Dash_Front.py"
