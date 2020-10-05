@@ -77,6 +77,17 @@ update_list=[
     ('peak_width_input','value',True),
     ('scan_selector','options',False),
     ('scan_selector','value',True),
+    ('profile_step_distance_input','value',True),
+    ('profile_step_number_input','value',True),
+    ('profile_repeat_measurements_input','value',True),
+    ('max_speed_input','value',True),
+    ('max_speed_input','disabled',False),
+    ('max_acceleration_input','value',True),
+    ('max_acceleration_input','disabled',False),
+    ('home_button','triggered',True),
+    ('home_button','disabled',False),
+    ('move_step_button','triggered',True),
+    ('move_step_button','disabled',False),
     ]
 
 ####################################################################

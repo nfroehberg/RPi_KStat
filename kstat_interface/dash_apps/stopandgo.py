@@ -26,6 +26,7 @@ root = Root(host=redis_host, port=redis_port, db=0)
 def start():
     return html.Div(id='start_button_container',
         style={'width':'40%'},
+        className='centered_row',
         children=[
             html.Button(id='start_button',
                 children='Start',
@@ -130,6 +131,7 @@ def open_close_start_popup(placeholder1,placeholder2,placeholder3):
 def stop():
     return html.Div(id='stop_button_container',
         style={'width':'40%'},
+        className='centered_row',
         children=[
             html.Button(id='stop_button',
                 children='Stop',

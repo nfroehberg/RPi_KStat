@@ -30,6 +30,56 @@ light_theme={
     'secondary': '#6E6E6E',
 }
 
+def home_button():
+    return html.Div(id='home_button_container',
+        style={'width':'40%'},
+        className='centered_row',
+        children=[
+            html.Button(id='home_button',
+                children='Home',
+                style={'width':'90%'}),
+            dcc.Store(id='home_button_triggered_update', data=1),
+            dcc.Store(id='home_button_triggered_update_acknowledged', data=2),]
+    )
+
+@app.callback(
+    Output('home_button_triggered_update_acknowledged','data'),
+    [Input('home_button','n_clicks')],
+    [State('home_button_triggered_update','data'),
+    State('home_button_triggered_update_acknowledged','data')])
+def home(n_clicks, update, update_acknowledged):
+    if update == update_acknowledged and n_clicks != None:
+        write_config([{'component':'home_button','attribute':'triggered','value':True}])
+        root.flush()
+        raise PreventUpdate
+    else:
+        return update
+
+def move_step_button():
+    return html.Div(id='move_step_button_container',
+        style={'width':'40%'},
+        className='centered_row',
+        children=[
+            html.Button(id='move_step_button',
+                children='Move Step',
+                style={'width':'90%'}),
+            dcc.Store(id='move_step_button_triggered_update', data=1),
+            dcc.Store(id='move_step_button_triggered_update_acknowledged', data=2),]
+    )
+
+@app.callback(
+    Output('move_step_button_triggered_update_acknowledged','data'),
+    [Input('move_step_button','n_clicks')],
+    [State('move_step_button_triggered_update','data'),
+    State('move_step_button_triggered_update_acknowledged','data')])
+def move_step(n_clicks, update, update_acknowledged):
+    if update == update_acknowledged and n_clicks != None:
+        write_config([{'component':'move_step_button','attribute':'triggered','value':True}])
+        root.flush()
+        raise PreventUpdate
+    else:
+        return update
+        
 def purge_switch():
     return html.Div(id='purge_switch_container',
         className='centered_row stirr_purge_switch',

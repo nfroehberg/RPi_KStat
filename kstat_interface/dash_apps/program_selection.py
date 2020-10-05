@@ -319,6 +319,34 @@ hg_au_electrode_plating_components = [
     'stop_button_container',
     ]
     
+profiler_cv_components = [
+    'cleaning_potential_input_container',
+    'deposition_potential_input_container',
+    'cleaning_time_input_container',
+    'deposition_time_input_container',
+    'purge_time_input_container',
+    'start_potential_input_container',
+    'vertex_potential_input_container',
+    'end_potential_input_container',
+    'slope_input_container',
+    'samplefreq_input_container',
+    'iv_gain_input_container',
+    'pga_gain_input_container',
+    'n_scans_input_container',
+    'graph_and_file_management',
+    'voltammogram_graph_container',
+    'scan_progress_container',
+    'series_progress_container',
+    'file_management',
+    'comment_input_container',
+    'start_button_container',
+    'stop_button_container',
+    'max_speed_input_container',
+    'max_acceleration_input_container',
+    'home_button_container',
+    'move_step_button_container',
+    ]
+    
 # method files are generated using component lists above. components from this list are excluded
 component_exclusion_list=[
     'start_button_container',
@@ -601,6 +629,7 @@ def category_selection():
                     {'label':'Voltammetry - Single Measurement','value':'voltammetry_single'},
                     {'label':'Voltammetry - Standard Addition','value':'voltammetry_standard_addition'},
                     {'label':'Hg/Au Electrode Fabrication','value':'hg_au_electrode_fabrication'},
+                    {'label':'Profiler','value':'profiler'},
                     ]
                 ),
             ]
@@ -628,9 +657,10 @@ def update_category(value, update, update_acknowledged):
             options = [
                 {'label':'Mercury Plating','value':'hg_au_electrode_plating'},
                 {'label':'Electrode Testing','value':'hg_au_electrode_testing'}]
+        elif value == 'profiler':
+            options = [{'label':'Cyclic Voltammetry Profile','value':'profiler_cv'}]
         else:
             options = []
-            
         if update == update_acknowledged:
             write_config([{'component':'program_selection',
                            'attribute':'options','value':options},
@@ -684,6 +714,7 @@ component_lists={
     'standard_addition_swv':standard_addition_swv_components,
     'hg_au_electrode_plating':hg_au_electrode_plating_components,
     'hg_au_electrode_testing':hg_au_electrode_testing_components,
+    'profiler_cv':profiler_cv_components,
     }
     
 @app.callback(

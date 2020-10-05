@@ -32,6 +32,196 @@ light_theme={
     'secondary': '#6E6E6E',
 }
 
+def max_acceleration():
+    return html.Div(id='max_acceleration_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='max_acceleration_input',
+                        min=-1999,
+                        max=1999,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='max_acceleration_input_value_update', data=1),
+            dcc.Store(id='max_acceleration_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='max_acceleration_input',
+                       children=['Max',html.Br(),'Acceleration [mm/s²]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('max_acceleration_input_value_update_acknowledged','data'),
+    [Input('max_acceleration_input','value')],
+    [State('max_acceleration_input_value_update','data'),
+     State('max_acceleration_input_value_update_acknowledged','data')])
+def update_max_acceleration(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'max_acceleration_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+        
+def max_speed():
+    return html.Div(id='max_speed_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='max_speed_input',
+                        min=-1999,
+                        max=1999,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='max_speed_input_value_update', data=1),
+            dcc.Store(id='max_speed_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='max_speed_input',
+                       children=['Max',html.Br(),'Speed [mm/s]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('max_speed_input_value_update_acknowledged','data'),
+    [Input('max_speed_input','value')],
+    [State('max_speed_input_value_update','data'),
+     State('max_speed_input_value_update_acknowledged','data')])
+def update_max_speed(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'max_speed_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+        
+def profile_repeat_measurements():
+    return html.Div(id='profile_repeat_measurements_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='profile_repeat_measurements_input',
+                        min=0,
+                        max=99,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='profile_repeat_measurements_input_value_update', data=1),
+            dcc.Store(id='profile_repeat_measurements_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='profile_repeat_measurements_input',
+                       children=['Measurement',html.Br(),'Replicates'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('profile_repeat_measurements_input_value_update_acknowledged','data'),
+    [Input('profile_repeat_measurements_input','value')],
+    [State('profile_repeat_measurements_input_value_update','data'),
+     State('profile_repeat_measurements_input_value_update_acknowledged','data')])
+def update_profile_repeat_measurements(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'profile_repeat_measurements_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+        
+def profile_step_number():
+    return html.Div(id='profile_step_number_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='profile_step_number_input',
+                        min=0,
+                        max=999,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='profile_step_number_input_value_update', data=1),
+            dcc.Store(id='profile_step_number_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='profile_step_number_input',
+                       children=['Profile',html.Br(),'Step Number'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('profile_step_number_input_value_update_acknowledged','data'),
+    [Input('profile_step_number_input','value')],
+    [State('profile_step_number_input_value_update','data'),
+     State('profile_step_number_input_value_update_acknowledged','data')])
+def update_profile_step_number(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'profile_step_number_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+        
+def profile_step_distance():
+    return html.Div(id='profile_step_distance_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'65px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='profile_step_distance_input',
+                        min=-500,
+                        max=500,
+                        size=65
+                        )
+                    )
+                ),
+            dcc.Store(id='profile_step_distance_input_value_update', data=1),
+            dcc.Store(id='profile_step_distance_input_value_update_acknowledged', data=2),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='profile_step_distance_input',
+                       children=['Profile',html.Br(),'Step [mm]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    Output('profile_step_distance_input_value_update_acknowledged','data'),
+    [Input('profile_step_distance_input','value')],
+    [State('profile_step_distance_input_value_update','data'),
+     State('profile_step_distance_input_value_update_acknowledged','data')])
+def update_profile_step_distance(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'profile_step_distance_input',
+                       'attribute':'value','value':value}])
+        raise PreventUpdate
+    else:
+        return update
+
 def cleaning_potential():
     return html.Div(id='cleaning_potential_input_container',
         className='centered_row',

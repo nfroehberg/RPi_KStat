@@ -65,7 +65,7 @@ def main():
                         stop(),
                         ]
                     ),
-                html.Div(style={'height':'10px'}),
+                html.Div(style={'height':'10px','width':'100%'}),
                 html.Div(
                     className='centered_row',
                     children=[
@@ -74,7 +74,15 @@ def main():
                         stirr_switch(),
                         ]
                     ),
-                html.Div(style={'height':'10px'}),
+                html.Div(style={'height':'10px','width':'100%'}),
+                html.Div(
+                    className='centered_row',
+                    children=[
+                        home_button(),
+                        move_step_button(),
+                        ]
+                    ),
+                html.Div(style={'height':'10px','width':'100%'}),
                 html.Div(
                     className='centered_row',
                     children=[
@@ -100,6 +108,9 @@ def main():
                 html.Div(
                     className='left_row',
                     children=[
+                        profile_step_distance(),
+                        profile_step_number(),
+                        profile_repeat_measurements(),
                         purge_time(),
                         cleaning_potential(),
                         cleaning_time(),
@@ -122,6 +133,8 @@ def main():
                         plating_potential(),
                         comment(),
                         n_electrode_tests(),
+                        max_speed(),
+                        max_acceleration()
                         ]
                     )
             ]

@@ -22,6 +22,7 @@ import kstat_interface.dash_apps.main_app as main_app
 from kstat_interface.dash_apps.app import app
 from kstat_interface import redis_config
 from subprocess import call
+from socket import gethostname
 import pathlib
 import os, shutil
 # to add a component that communicates with the backend:
@@ -134,6 +135,13 @@ initial_config={
     'baseline_polynomial_input':{'value':4},
     'peak_width_input':{'value':20},
     'scan_selector':{'options':[],'value':''},
+    'profile_step_distance_input':{'value':1},
+    'profile_step_number_input':{'value':50},
+    'profile_repeat_measurements_input':{'value':3},
+    'max_speed_input':{'value':1,'disabled':False},
+    'max_acceleration_input':{'value':5,'disabled':False},
+    'home_button':{'triggered':False,'disabled':False},
+    'move_step_button':{'triggered':False,'disabled':False},
     }
 
 def initialize_config():
@@ -222,7 +230,7 @@ if __name__ == '__main__':
             initialize_config()
 
             app.layout = setup_layout()
-            app.run_server(debug=False, host='voltammetrypi.local', port=8080)
+            app.run_server(debug=False, host='{}.local'.format(gethostname()), port=8080)
         except Exception as e:
             print(e)
             sleep(1)
