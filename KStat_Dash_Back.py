@@ -1,4 +1,5 @@
 from kstat_interface.backend_apps.drivers.tb6612_motor_driver import TB6612
+from kstat_interface.backend_apps.drivers.pololu_tic_driver import TicSerial
 from time import sleep, time
 import kstat_interface.backend_apps.drivers.KStat_0_1_driver as KStat
 from serial import Serial
@@ -14,6 +15,7 @@ from kstat_interface.backend_apps.single_dpv import single_dpv
 from kstat_interface.backend_apps.single_lsv import single_lsv
 from kstat_interface.backend_apps.single_swv import single_swv
 from kstat_interface.backend_apps.profiler_cv import profiler_cv
+from kstat_interface.backend_apps.profiler_movement import profiler_home, profiler_move_step
 from kstat_interface import redis_config
 import RPi.GPIO as GPIO
 from multiprocessing import Process
@@ -24,6 +26,8 @@ def initialize_components():
     write_config([{'component':'purge_switch','attribute':'disabled','value':False},
                   {'component':'stirr_switch','attribute':'disabled','value':False},
                   {'component':'start_button','attribute':'disabled','value':False},
+                  {'component':'home_button','attribute':'disabled','value':False},
+                  {'component':'move_step_button','attribute':'disabled','value':False},
                   {'component':'stop_button','attribute':'disabled','value':True},
                   ])
 
@@ -61,8 +65,29 @@ def initialize_KStat():
         print('No KStat connected')
 
 def initialize_profiler():
-    global profiler
-    profiler = 9
+    global profiler, mm
+    # calibrate speed
+    step_mode = 5
+    screw_pitch = 4 # mm
+    steps_per_rotation = 200 * (2**step_mode)
+    mm = steps_per_rotation/screw_pitch
+    
+    config = literal_eval(str(root.config))
+    max_speed = config['max_speed_input']['value'] * mm * 10000
+    max_acceleration = config['max_acceleration_input']['value'] * mm * 100
+    try:
+        port = serial.Serial(port_name="/dev/serial0", baud_rate=9600, timeout=0.1, write_timeout=0.1)
+        profiler = TicSerial(port,limits=True)
+        profiler.reset()
+        profiler.energize()
+        profiler.halt_and_set_position()
+        profiler.set_step_mode(step_mode)
+        profiler.set_max_speed(max_speed)
+        profiler.set_max_acceleration(max_acceleration)
+        profiler.set_max_deceleration(max_acceleration)
+    except:
+        print('Could not initialize profiler')
+        profiler = 9
 
 stored_stamp = ''
 if __name__ == '__main__':
@@ -114,7 +139,7 @@ if __name__ == '__main__':
                             elif config['program_selection']['value'] == 'single_swv':
                                 measurement = Process(target=single_swv,args=(measurement_config,motor,ser))
                             elif config['program_selection']['value'] == 'profiler_cv':
-                                measurement = Process(target=profiler_cv,args=(measurement_config,motor,ser,profiler))
+                                measurement = Process(target=profiler_cv,args=(measurement_config,motor,ser,profiler,mm))
                                 
                             measurement.start()
                             
@@ -131,12 +156,24 @@ if __name__ == '__main__':
                             measurement.terminate()
                             KStat.abort(ser)
                             KStat.idle(ser,0)
+                            
                         if config['home_button']['triggered']:
-                            print('Homing triggered')
-                            write_config([{'component':'home_button','attribute':'triggered','value':False},])
+                            write_config([{'component':'home_button','attribute':'triggered','value':False},
+                                            {'component':'start_button','attribute':'disabled','value':True},
+                                            {'component':'stop_button','attribute':'disabled','value':True},
+                                            {'component':'home_button','attribute':'disabled','value':True},
+                                            {'component':'move_step_button','attribute':'disabled','value':True},])
+                            profiler_move = Process(target=profiler_home,args=(config,profiler,mm))
+                            profiler_move.start()
                         if config['move_step_button']['triggered']:
-                            print('Move Step triggered')
-                            write_config([{'component':'move_step_button','attribute':'triggered','value':False},])
+                            write_config([{'component':'move_step_button','attribute':'triggered','value':False},
+                                            {'component':'start_button','attribute':'disabled','value':True},
+                                            {'component':'stop_button','attribute':'disabled','value':True},
+                                            {'component':'home_button','attribute':'disabled','value':True},
+                                            {'component':'move_step_button','attribute':'disabled','value':True},])
+                            profiler_move = Process(target=profiler_move_step,args=(config,profiler,mm))
+                            profiler_move.start()
+                        
                 except Exception as e:
                     print(e)
         except Exception as e:

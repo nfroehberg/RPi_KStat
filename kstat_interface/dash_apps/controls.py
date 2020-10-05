@@ -30,6 +30,13 @@ light_theme={
     'secondary': '#6E6E6E',
 }
 
+def profiler_position():
+    return html.Div(id='profiler_position_container',
+        style={'width':'100%'},
+        className='centered_row',
+        children=[html.Div(id='profiler_position')]
+        )
+
 def home_button():
     return html.Div(id='home_button_container',
         style={'width':'40%'},

@@ -66,6 +66,13 @@ visibility_controlled_components =[
     'n_electrode_tests_input_container',
     'start_button_container',
     'stop_button_container',
+    'max_speed_input_container',
+    'max_acceleration_input_container',
+    'home_button_container',
+    'move_step_button_container',
+    'profiler_position_container',
+    'profile_step_distance_input_container',
+    'profile_step_number_input_container',
     ]
     
 single_cv_components = [
@@ -344,6 +351,9 @@ profiler_cv_components = [
     'max_acceleration_input_container',
     'home_button_container',
     'move_step_button_container',
+    'profiler_position_container',
+    'profile_step_distance_input_container',
+    'profile_step_number_input_container',
     ]
     
 # method files are generated using component lists above. components from this list are excluded
@@ -357,7 +367,10 @@ component_exclusion_list=[
     'stirr_speed_slider_container',
     'scan_progress_container',
     'series_progress_container',
-    'file_management']
+    'file_management',
+    'profiler_position_container',
+    'home_button_container',
+    'move_step_button_container',]
 
 def config_selection():
     return html.Div(id='config_selection_container',

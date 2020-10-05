@@ -88,6 +88,7 @@ update_list=[
     ('home_button','disabled',False),
     ('move_step_button','triggered',True),
     ('move_step_button','disabled',False),
+    ('profiler_position','children',False),
     ]
 
 ####################################################################

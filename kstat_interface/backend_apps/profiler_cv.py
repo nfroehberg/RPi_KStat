@@ -21,5 +21,5 @@ from .single_cv import cv_measurement
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0)
 
-def profiler_cv(config,motor,ser,profiler):
+def profiler_cv(config,motor,ser,profiler,mm):
     print('Profiler CV triggered')

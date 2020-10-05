@@ -90,6 +90,13 @@ def main():
                         series_progress(),
                         ]
                     ),
+                html.Div(style={'height':'10px','width':'100%'}),
+                html.Div(
+                    className='centered_row',
+                    children=[
+                        profiler_position()
+                        ]
+                    ),
                 ]
             ),
             
@@ -111,6 +118,8 @@ def main():
                         profile_step_distance(),
                         profile_step_number(),
                         profile_repeat_measurements(),
+                        max_speed(),
+                        max_acceleration(),
                         purge_time(),
                         cleaning_potential(),
                         cleaning_time(),
@@ -133,8 +142,6 @@ def main():
                         plating_potential(),
                         comment(),
                         n_electrode_tests(),
-                        max_speed(),
-                        max_acceleration()
                         ]
                     )
             ]

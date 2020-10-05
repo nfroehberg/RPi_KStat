@@ -142,6 +142,7 @@ initial_config={
     'max_acceleration_input':{'value':5,'disabled':False},
     'home_button':{'triggered':False,'disabled':False},
     'move_step_button':{'triggered':False,'disabled':False},
+    'profiler_position':{'children':'Profiler Position: 00.0 mm'},
     }
 
 def initialize_config():
