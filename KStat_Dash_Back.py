@@ -16,6 +16,7 @@ from kstat_interface.backend_apps.single_swv import single_swv
 from kstat_interface import redis_config
 import RPi.GPIO as GPIO
 from multiprocessing import Process
+from glob import glob
 
 # Serial address of KStat at specific USB port
 KStat_path = '/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0'
@@ -42,16 +43,24 @@ def initialize_motor():
 
 # set up KStat potentiostat
 def initialize_KStat():
-    global ser
-    ser = Serial(KStat_path, 9600, timeout = 1)
-    ADSbuffer = 1
-    sample_rate = "1KHz"
-    PGA_gain = 2
-    iv_gain = "POT_GAIN_300K"
-    KStat.abort(ser)
-    KStat.setupADC(ser, ADSbuffer, sample_rate, PGA_gain)
-    KStat.setGain(ser, iv_gain)
-    KStat.idle(ser,0)
+    devices = glob('/dev/serial/by-id/*')
+    KStat_port = ''
+    for port in devices:
+        if 'DStat' in port:
+            KStat_port = port
+            global ser
+            ser = Serial(KStat_port, 9600, timeout = 1)
+            ADSbuffer = 1
+            sample_rate = "1KHz"
+            PGA_gain = 2
+            iv_gain = "POT_GAIN_300K"
+            KStat.abort(ser)
+            KStat.setupADC(ser, ADSbuffer, sample_rate, PGA_gain)
+            KStat.setGain(ser, iv_gain)
+            KStat.idle(ser,0)
+            break
+    if KStat_port == '':
+        print('No KStat connected')
 
 stored_stamp = ''
 if __name__ == '__main__':
