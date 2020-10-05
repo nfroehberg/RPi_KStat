@@ -13,13 +13,11 @@ from kstat_interface.backend_apps.single_cv import single_cv
 from kstat_interface.backend_apps.single_dpv import single_dpv
 from kstat_interface.backend_apps.single_lsv import single_lsv
 from kstat_interface.backend_apps.single_swv import single_swv
+from kstat_interface.backend_apps.profiler_cv import profiler_cv
 from kstat_interface import redis_config
 import RPi.GPIO as GPIO
 from multiprocessing import Process
 from glob import glob
-
-# Serial address of KStat at specific USB port
-KStat_path = '/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0'
 
 # set control components to be enabled/disabled correctly in case program exited incorrectly before
 def initialize_components():
@@ -62,6 +60,10 @@ def initialize_KStat():
     if KStat_port == '':
         print('No KStat connected')
 
+def initialize_profiler():
+    global profiler
+    profiler = 9
+
 stored_stamp = ''
 if __name__ == '__main__':
     while True:
@@ -69,6 +71,7 @@ if __name__ == '__main__':
             initialize_redis()
             initialize_motor()
             initialize_KStat()
+            initialize_profiler()
             initialize_components()
             updated_timestamp=str(time())
             # main loop: check for updates on root server and execute commands from front end
@@ -110,6 +113,8 @@ if __name__ == '__main__':
                                 measurement = Process(target=single_lsv,args=(measurement_config,motor,ser))
                             elif config['program_selection']['value'] == 'single_swv':
                                 measurement = Process(target=single_swv,args=(measurement_config,motor,ser))
+                            elif config['program_selection']['value'] == 'profiler_cv':
+                                measurement = Process(target=profiler_cv,args=(measurement_config,motor,ser,profiler))
                                 
                             measurement.start()
                             
@@ -126,7 +131,12 @@ if __name__ == '__main__':
                             measurement.terminate()
                             KStat.abort(ser)
                             KStat.idle(ser,0)
-                            
+                        if config['home_button']['triggered']:
+                            print('Homing triggered')
+                            write_config([{'component':'home_button','attribute':'triggered','value':False},])
+                        if config['move_step_button']['triggered']:
+                            print('Move Step triggered')
+                            write_config([{'component':'move_step_button','attribute':'triggered','value':False},])
                 except Exception as e:
                     print(e)
         except Exception as e:

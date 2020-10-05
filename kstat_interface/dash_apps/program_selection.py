@@ -324,7 +324,6 @@ profiler_cv_components = [
     'deposition_potential_input_container',
     'cleaning_time_input_container',
     'deposition_time_input_container',
-    'purge_time_input_container',
     'start_potential_input_container',
     'vertex_potential_input_container',
     'end_potential_input_container',
