@@ -32,6 +32,7 @@ default_theme = {'font_color':'white',
                  'baseline_color':'rgb(0,180,0)',
                  'auto_peak_color':'rgb(255,150,0)',
                  'manual_peak_color':'rgb(255,0,0)',
+                 'o2_measurement_color':'rgb(0,255,0)',
                  'grid_color':'black',
                  }
 download_theme = {'font_color':'black',
@@ -40,6 +41,7 @@ download_theme = {'font_color':'black',
                  'baseline_color':'rgb(0,180,0)',
                  'auto_peak_color':'rgb(255,150,0)',
                  'manual_peak_color':'rgb(255,0,0)',
+                 'o2_measurement_color':'rgb(0,255,0)',
                  'grid_color':'rgb(200,200,200)',
                  }
                  
@@ -274,6 +276,61 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,grap
                               'mode':'text','textfont':{'color':theme['manual_peak_color']},
                               'textposition':['bottom center','middle right'],})
             peakfile[1] = peakfile[1] + '{},manual,{:.0f},{:.2E},\n'.format(graph_title,x_points.iloc[1],i_diff)
+    
+    # O2 Measurements
+    # detecting low point in lower window (after O2 peak) and high point in upper window (H2O2 peak)
+    if config['o2_measurement_switch']['on']:
+        # isolating lower and upper window in data
+        lower_left = config['o2_lower_left_input']['value']
+        lower_right = config['o2_lower_right_input']['value']
+        upper_left = config['o2_upper_left_input']['value']
+        upper_right = config['o2_upper_right_input']['value']
+        vertex = list(x_data).index(min(x_data))
+        o2_x_data = x_data[0:vertex]
+        o2_y_data = y_data[0:vertex]
+        plot_data.append({'x':[lower_left,lower_left],'y':[min(y_data),max(y_data)],
+                            'mode':'lines','marker':{'color':theme['font_color']},'line':{'dash':'dot','width':1}})
+        plot_data.append({'x':[lower_right,lower_right],'y':[min(y_data),max(y_data)],
+                            'mode':'lines','marker':{'color':theme['font_color']},'line':{'dash':'dot','width':1}})
+        plot_data.append({'x':[upper_left,upper_left],'y':[min(y_data),max(y_data)],
+                            'mode':'lines','marker':{'color':theme['font_color']},'line':{'dash':'dot','width':1}})
+        plot_data.append({'x':[upper_right,upper_right],'y':[min(y_data),max(y_data)],
+                            'mode':'lines','marker':{'color':theme['font_color']},'line':{'dash':'dot','width':1}})
+        lower_left_index = abs(o2_x_data-lower_left).idxmin()
+        lower_right_index = abs(o2_x_data-lower_right).idxmin()
+        upper_left_index = abs(o2_x_data-upper_left).idxmin()
+        upper_right_index = abs(o2_x_data-upper_right).idxmin()
+        lower_range_y = o2_y_data[lower_left_index:lower_right_index]
+        lower_range_x = o2_x_data[lower_left_index:lower_right_index]
+        upper_range_y = o2_y_data[upper_left_index:upper_right_index]
+        upper_range_x = o2_x_data[upper_left_index:upper_right_index]
+        
+        # finding high and low point
+        low_point_index = abs(lower_range_y-max(lower_range_y)).idxmin()
+        low_point_x = lower_range_x[low_point_index]
+        low_point_y = lower_range_y[low_point_index]
+        low_point_text = '{0:.0f} mV<br>{1:.2E} A'.format(low_point_x,low_point_y)
+        high_point_index = abs(upper_range_y-min(upper_range_y)).idxmin()
+        high_point_x = upper_range_x[high_point_index]
+        high_point_y = upper_range_y[high_point_index]
+        high_point_text = '{0:.0f} mV<br>{1:.2E} A'.format(high_point_x,high_point_y)
+        
+        delta_current = high_point_y - low_point_y
+        delta_y = low_point_y + (delta_current/2)
+        delta_text = 'Delta:<br>{:.2E} A'.format(delta_current)
+        
+        # adding to plot
+        plot_data.append({'x':[low_point_x,high_point_x],'y':[low_point_y,high_point_y],
+                          'mode':'markers+text','marker':{'color':theme['o2_measurement_color']},
+                          'text':[low_point_text,high_point_text],
+                          'textfont':{'color':theme['font_color']},
+                          'textposition':'top center'})
+        plot_data.append({'x':[low_point_x,high_point_x,high_point_x],'y':[low_point_y,low_point_y,high_point_y],
+                            'mode':'lines','marker':{'color':theme['o2_measurement_color']}})
+        plot_data.append({'x':[high_point_x],'y':[delta_y],'text':[delta_text],
+                          'mode':'text',
+                          'textfont':{'color':theme['font_color']},
+                          'textposition':'right center'})
     
     figure={
         'data':plot_data,

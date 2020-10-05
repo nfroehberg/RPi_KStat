@@ -42,6 +42,10 @@ def scan_parameters():
                     html.Button(children='Peak Detection',
                         id='peak_detection_button',
                         style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
+                    html.Div(style={'width':'5px'}),
+                    html.Button(children='Oxygen Measurement',
+                        id='o2_measurement_button',
+                        style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
                     ]),
             dbc.Collapse(id='scan_parameters_collapse',
                         children=html.Button(id='copy_scan_settings_button',children='Copy Scan Parameters to Current Settings')),
@@ -61,7 +65,15 @@ def scan_parameters():
                         target='save_peak_button'),
                     dcc.Store(id='peak_file_data',data=''),
                     dcc.Store(id='peak_file_placeholder'),
-                    ])
+                    ]),
+            dbc.Collapse(id='o2_measurement_collapse',
+                className='left_row',
+                children=[
+                    o2_measurement_switch(),
+                    o2_lower_left(),
+                    o2_lower_right(),
+                    o2_upper_left(),
+                    o2_upper_right()])
                 ])
 
 @app.callback(
@@ -72,8 +84,13 @@ def scan_parameters():
      Input('baseline_polynomial_input_graph_update','modified_timestamp'),
      Input('baseline_switch_graph_update','modified_timestamp'),
      Input('peak_detection_switch_graph_update','modified_timestamp'),
-     Input('peak_width_input_graph_update','modified_timestamp'),])
-def update_graph_peak(input1,input2,input3,input4,input5,input6,input7):
+     Input('peak_width_input_graph_update','modified_timestamp'),
+     Input('o2_upper_right_input_graph_update','modified_timestamp'),
+     Input('o2_upper_left_input_graph_update','modified_timestamp'),
+     Input('o2_lower_right_input_graph_update','modified_timestamp'),
+     Input('o2_lower_left_input_graph_update','modified_timestamp'),
+     Input('o2_measurement_switch_graph_update','modified_timestamp'),])
+def update_graph_peak(input1,input2,input3,input4,input5,input6,input7,input8,input9,input10,input11,input12):
     return time()
 
 @app.callback(
@@ -361,12 +378,15 @@ def activate_peak_detection(switch, update, update_acknowledged):
 # only one of them is opened at a time and if same button is pressed again, the section is collapsed
 @app.callback(
     [Output('scan_parameters_collapse','is_open'),
-     Output('peak_detection_collapse','is_open')],
+     Output('peak_detection_collapse','is_open'),
+     Output('o2_measurement_collapse','is_open')],
     [Input('scan_parameters_button','n_clicks'),
-     Input('peak_detection_button','n_clicks')],
+     Input('peak_detection_button','n_clicks'),
+     Input('o2_measurement_button','n_clicks')],
     [State('scan_parameters_collapse','is_open'),
-     State('peak_detection_collapse','is_open')])
-def open_scan_parameters(parameters_clicks,peak_clicks,parameter_open,peak_open):
+     State('peak_detection_collapse','is_open'),
+     State('o2_measurement_collapse','is_open')])
+def open_scan_parameters(parameters_clicks,peak_clicks,o2_clicks,parameter_open,peak_open,o2_open):
     ctx = callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
@@ -374,14 +394,24 @@ def open_scan_parameters(parameters_clicks,peak_clicks,parameter_open,peak_open)
     
     if trigger_id == 'scan_parameters_button':
         if parameter_open:
-            return [False, False]
+            return [False, False, False]
         else:
-            return [True, False]
-    else:
+            return [True, False, False]
+            
+    elif trigger_id == 'peak_detection_button':
         if peak_open:
-            return [False, False]
+            return [False, False, False]
         else:
-            return [False, True]
+            return [False, True, False]
+            
+    elif trigger_id == 'o2_measurement_button':
+        if o2_open:
+            return [False, False, False]
+        else:
+            return [False, False, True]
+    
+    else:
+        raise PreventUpdate
 
 def noise_filter():
     return html.Div(id='noise_filter_container',
@@ -446,5 +476,201 @@ def update_noise_frequency(value, update, update_acknowledged, file):
             return [no_update, file]
         else:
             raise PreventUpdate
+    else:
+        return [update, no_update]
+
+
+###########################################################
+#O2 Measurement Components
+
+def o2_lower_left():
+    return html.Div(id='o2_lower_left_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'95px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='o2_lower_left_input',
+                        min=-1999,
+                        max=1999,
+                        size=95
+                        )
+                    )
+                ),
+            dcc.Store(id='o2_lower_left_input_value_update', data=1),
+            dcc.Store(id='o2_lower_left_input_value_update_acknowledged', data=2),
+            dcc.Store(id='o2_lower_left_input_graph_update'),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='o2_lower_left_input',
+                       children=['Lower Left',html.Br(),'Limit [mV]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('o2_lower_left_input_value_update_acknowledged','data'),
+     Output('o2_lower_left_input_graph_update','data')],
+    [Input('o2_lower_left_input','value')],
+    [State('o2_lower_left_input_value_update','data'),
+     State('o2_lower_left_input_value_update_acknowledged','data')])
+def update_o2_lower_left(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'o2_lower_left_input',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+        
+        
+def o2_lower_right():
+    return html.Div(id='o2_lower_right_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'95px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='o2_lower_right_input',
+                        min=-1999,
+                        max=1999,
+                        size=95
+                        )
+                    )
+                ),
+            dcc.Store(id='o2_lower_right_input_value_update', data=1),
+            dcc.Store(id='o2_lower_right_input_value_update_acknowledged', data=2),
+            dcc.Store(id='o2_lower_right_input_graph_update'),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='o2_lower_right_input',
+                       children=['Lower Right',html.Br(),'Limit [mV]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('o2_lower_right_input_value_update_acknowledged','data'),
+     Output('o2_lower_right_input_graph_update','data')],
+    [Input('o2_lower_right_input','value')],
+    [State('o2_lower_right_input_value_update','data'),
+     State('o2_lower_right_input_value_update_acknowledged','data')])
+def update_o2_lower_right(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'o2_lower_right_input',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+        
+def o2_upper_left():
+    return html.Div(id='o2_upper_left_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'95px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='o2_upper_left_input',
+                        min=-1999,
+                        max=1999,
+                        size=95
+                        )
+                    )
+                ),
+            dcc.Store(id='o2_upper_left_input_value_update', data=1),
+            dcc.Store(id='o2_upper_left_input_value_update_acknowledged', data=2),
+            dcc.Store(id='o2_upper_left_input_graph_update'),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='o2_upper_left_input',
+                       children=['Upper Left',html.Br(),'Limit [mV]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('o2_upper_left_input_value_update_acknowledged','data'),
+     Output('o2_upper_left_input_graph_update','data')],
+    [Input('o2_upper_left_input','value')],
+    [State('o2_upper_left_input_value_update','data'),
+     State('o2_upper_left_input_value_update_acknowledged','data')])
+def update_o2_upper_left(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'o2_upper_left_input',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+        
+        
+def o2_upper_right():
+    return html.Div(id='o2_upper_right_input_container',
+        className='centered_row',
+        children=[
+            html.Div(
+                style={'width':'95px'},
+                children=daq.DarkThemeProvider(
+                    theme=light_theme,
+                    children=daq.NumericInput(
+                        id='o2_upper_right_input',
+                        min=-1999,
+                        max=1999,
+                        size=95
+                        )
+                    )
+                ),
+            dcc.Store(id='o2_upper_right_input_value_update', data=1),
+            dcc.Store(id='o2_upper_right_input_value_update_acknowledged', data=2),
+            dcc.Store(id='o2_upper_right_input_graph_update'),
+            html.Div(style={'width':'10px'}),
+            html.Label(htmlFor='o2_upper_right_input',
+                       children=['Upper Right',html.Br(),'Limit [mV]'],
+                       style={'width':'110px'}
+                       ),
+            ]
+        )
+@app.callback(
+    [Output('o2_upper_right_input_value_update_acknowledged','data'),
+     Output('o2_upper_right_input_graph_update','data')],
+    [Input('o2_upper_right_input','value')],
+    [State('o2_upper_right_input_value_update','data'),
+     State('o2_upper_right_input_value_update_acknowledged','data')])
+def update_o2_upper_right(value, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'o2_upper_right_input',
+                       'attribute':'value','value':value}])
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+        
+def o2_measurement_switch():
+    return html.Div(id='o2_measurement_switch_container',
+        className='centered_row',
+        children=[
+            daq.BooleanSwitch(id="o2_measurement_switch",style={'width':'95px'}),
+            html.Div(style={'width':'10px'}),
+            html.Label(
+                htmlFor='o2_measurement_switch',
+                children='Measure O2',
+                style={'width':'110px'}),
+            dcc.Store(id='o2_measurement_switch_on_update', data=1),
+            dcc.Store(id='o2_measurement_switch_on_update_acknowledged', data=2),
+            dcc.Store(id='o2_measurement_switch_graph_update'),]
+    )
+    
+# if state of purge switch changes, write to config file
+@app.callback(
+    [Output('o2_measurement_switch_on_update_acknowledged','data'),
+     Output('o2_measurement_switch_graph_update','data')],
+    [Input('o2_measurement_switch','on')],
+    [State('o2_measurement_switch_on_update','data'),
+    State('o2_measurement_switch_on_update_acknowledged','data')])
+def activate_o2_measurement(switch, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'o2_measurement_switch','attribute':'on','value':switch}])
+        root.flush()
+        return [no_update, time()]
     else:
         return [update, no_update]

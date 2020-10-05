@@ -73,6 +73,7 @@ visibility_controlled_components =[
     'profiler_position_container',
     'profile_step_distance_input_container',
     'profile_step_number_input_container',
+    'o2_measurement_button',
     ]
     
 single_cv_components = [
@@ -99,6 +100,7 @@ single_cv_components = [
     'comment_input_container',
     'start_button_container',
     'stop_button_container',
+    'o2_measurement_button',
     ]
     
 single_lsv_components = [
@@ -123,6 +125,7 @@ single_lsv_components = [
     'comment_input_container',
     'start_button_container',
     'stop_button_container',
+    'o2_measurement_button',
     ]
     
 single_dpv_components = [
@@ -204,6 +207,7 @@ standard_addition_cv_components = [
     'comment_input_container',
     'start_button_container',
     'stop_button_container',
+    'o2_measurement_button',
     ]
     
 standard_addition_lsv_components = [
@@ -230,6 +234,7 @@ standard_addition_lsv_components = [
     'comment_input_container',
     'start_button_container',
     'stop_button_container',
+    'o2_measurement_button',
     ]
     
 standard_addition_dpv_components = [
@@ -313,6 +318,7 @@ hg_au_electrode_testing_components = [
     'n_electrode_tests_input_container',
     'start_button_container',
     'stop_button_container',
+    'o2_measurement_button',
     ]
 
 hg_au_electrode_plating_components = [
@@ -354,6 +360,7 @@ profiler_cv_components = [
     'profiler_position_container',
     'profile_step_distance_input_container',
     'profile_step_number_input_container',
+    'o2_measurement_button',
     ]
  
 profiler_lsv_components = [
@@ -382,6 +389,7 @@ profiler_lsv_components = [
     'profile_step_distance_input_container',
     'profile_step_number_input_container',
     'series_progress_container',
+    'o2_measurement_button',
     ]
  
 profiler_dpv_components = [

@@ -89,7 +89,12 @@ update_list=[
     ('move_step_button','triggered',True),
     ('move_step_button','disabled',False),
     ('profiler_position','children',False),
-    ('directory_and_scan_refresher','data',False)
+    ('directory_and_scan_refresher','data',False),
+    ('o2_measurement_switch','on',True),
+    ('o2_upper_right_input','value',True),
+    ('o2_upper_left_input','value',True),
+    ('o2_lower_right_input','value',True),
+    ('o2_lower_left_input','value',True),
     ]
 
 ####################################################################
