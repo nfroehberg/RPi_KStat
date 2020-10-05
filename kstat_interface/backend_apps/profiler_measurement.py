@@ -16,12 +16,15 @@ from glob import glob
 import os
 from .. import redis_config
 from .single_cv import cv_measurement
+from .single_dpv import dpv_measurement
+from .single_lsv import lsv_measurement
+from .single_swv import swv_measurement
  
 
 redis_host,redis_port = redis_config.get_config()
 root = Root(host=redis_host, port=redis_port, db=0) 
 
-def profiler_cv(config,motor,ser,profiler,mm):
+def profiler_measurement(type,config,motor,ser,profiler,mm):
     controls_disabled(True)
     print('Profiler CV triggered')
     
@@ -56,7 +59,16 @@ def profiler_cv(config,motor,ser,profiler,mm):
                         {'component':'series_progress','attribute':'value','value':(1/(n_steps+1))*100},])
         scan_id = '_step000_{:05.1f}mm_{:02.0f}'.format(position,i+1)
         file = root.working_directory + profile_id + scan_id
-        cv_measurement(config, motor, ser, file)
+        
+        if type == 'cv':
+            cv_measurement(config, motor, ser, file)
+        elif type == 'lsv':
+            lsv_measurement(config, motor, ser, file)
+        elif type == 'dpv':
+            dpv_measurement(config, motor, ser, file)
+        elif type == 'swv':
+            swv_measurement(config, motor, ser, file)
+            
         root.flush()
         file_options = literal_eval(str(root.config))['scan_selector']['options']
         file_options.append({'label':profile_id+scan_id,'value':file+'.csv'})
@@ -79,7 +91,16 @@ def profiler_cv(config,motor,ser,profiler,mm):
             write_config([{'component':'series_progress_label','attribute':'children','value':'Measurement {}/{} - Scan {}/{}'.format(i+2,n_steps+1,j+1,n_replicates)}])
             scan_id = '_step{:03.0f}_{:05.1f}mm_{:02.0f}'.format(i+1,position,j+1)
             file = root.working_directory + profile_id + scan_id
-            cv_measurement(config, motor, ser, file)
+            
+            if type == 'cv':
+                cv_measurement(config, motor, ser, file)
+            elif type == 'lsv':
+                lsv_measurement(config, motor, ser, file)
+            elif type == 'dpv':
+                dpv_measurement(config, motor, ser, file)
+            elif type == 'swv':
+                swv_measurement(config, motor, ser, file)
+                
             root.flush()
             file_options = literal_eval(str(root.config))['scan_selector']['options']
             file_options.append({'label':profile_id+scan_id,'value':file+'.csv'})

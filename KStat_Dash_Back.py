@@ -14,7 +14,7 @@ from kstat_interface.backend_apps.single_cv import single_cv
 from kstat_interface.backend_apps.single_dpv import single_dpv
 from kstat_interface.backend_apps.single_lsv import single_lsv
 from kstat_interface.backend_apps.single_swv import single_swv
-from kstat_interface.backend_apps.profiler_cv import profiler_cv
+from kstat_interface.backend_apps.profiler_measurement import profiler_measurement
 from kstat_interface.backend_apps.profiler_movement import profiler_home, profiler_move_step
 from kstat_interface import redis_config
 import RPi.GPIO as GPIO
@@ -140,9 +140,15 @@ if __name__ == '__main__':
                             elif config['program_selection']['value'] == 'single_lsv':
                                 measurement = Process(target=single_lsv,args=(measurement_config,motor,ser))
                             elif config['program_selection']['value'] == 'single_swv':
-                                measurement = Process(target=single_swv,args=(measurement_config,motor,ser))
+                                measurement = Process(target=single_swv,args=(measurement_config,motor,ser)) 
                             elif config['program_selection']['value'] == 'profiler_cv':
-                                measurement = Process(target=profiler_cv,args=(measurement_config,motor,ser,profiler,mm))
+                                measurement = Process(target=profiler_measurement,args=('cv',measurement_config,motor,ser,profiler,mm))
+                            elif config['program_selection']['value'] == 'profiler_lsv':
+                                measurement = Process(target=profiler_measurement,args=('lsv',measurement_config,motor,ser,profiler,mm))
+                            elif config['program_selection']['value'] == 'profiler_dpv':
+                                measurement = Process(target=profiler_measurement,args=('dpv',measurement_config,motor,ser,profiler,mm))
+                            elif config['program_selection']['value'] == 'profiler_swv':
+                                measurement = Process(target=profiler_measurement,args=('swv',measurement_config,motor,ser,profiler,mm))
                                 
                             measurement.start()
                             

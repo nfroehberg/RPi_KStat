@@ -355,6 +355,96 @@ profiler_cv_components = [
     'profile_step_distance_input_container',
     'profile_step_number_input_container',
     ]
+ 
+profiler_lsv_components = [
+    'cleaning_potential_input_container',
+    'deposition_potential_input_container',
+    'cleaning_time_input_container',
+    'deposition_time_input_container',
+    'start_potential_input_container',
+    'end_potential_input_container',
+    'slope_input_container',
+    'samplefreq_input_container',
+    'iv_gain_input_container',
+    'pga_gain_input_container',
+    'graph_and_file_management',
+    'voltammogram_graph_container',
+    'scan_progress_container',
+    'file_management',
+    'comment_input_container',
+    'start_button_container',
+    'stop_button_container',
+    'max_speed_input_container',
+    'max_acceleration_input_container',
+    'home_button_container',
+    'move_step_button_container',
+    'profiler_position_container',
+    'profile_step_distance_input_container',
+    'profile_step_number_input_container',
+    'series_progress_container',
+    ]
+ 
+profiler_dpv_components = [
+    'cleaning_potential_input_container',
+    'deposition_potential_input_container',
+    'cleaning_time_input_container',
+    'deposition_time_input_container',
+    'start_potential_input_container',
+    'end_potential_input_container',
+    'step_size_input_container',
+    'pulse_height_input_container',
+    'pulse_width_input_container',
+    'period_input_container',
+    'samplefreq_input_container',
+    'iv_gain_input_container',
+    'pga_gain_input_container',
+    'graph_and_file_management',
+    'voltammogram_graph_container',
+    'scan_progress_container',
+    'file_management',
+    'comment_input_container',
+    'start_button_container',
+    'stop_button_container',
+    'max_speed_input_container',
+    'max_acceleration_input_container',
+    'home_button_container',
+    'move_step_button_container',
+    'profiler_position_container',
+    'profile_step_distance_input_container',
+    'profile_step_number_input_container',
+    'series_progress_container',
+    ]
+
+profiler_swv_components = [
+    'cleaning_potential_input_container',
+    'deposition_potential_input_container',
+    'cleaning_time_input_container',
+    'deposition_time_input_container',
+    'start_potential_input_container',
+    'end_potential_input_container',
+    'step_size_input_container',
+    'pulse_height_input_container',
+    'frequency_input_container',
+    'samplefreq_input_container',
+    'n_scans_input_container',
+    'iv_gain_input_container',
+    'pga_gain_input_container',
+    'graph_and_file_management',
+    'voltammogram_graph_container',
+    'scan_progress_container',
+    'file_management',
+    'comment_input_container',
+    'start_button_container',
+    'stop_button_container',
+    'max_speed_input_container',
+    'max_acceleration_input_container',
+    'home_button_container',
+    'move_step_button_container',
+    'profiler_position_container',
+    'profile_step_distance_input_container',
+    'profile_step_number_input_container',
+    'series_progress_container',
+    ]
     
 # method files are generated using component lists above. components from this list are excluded
 component_exclusion_list=[
@@ -670,7 +760,11 @@ def update_category(value, update, update_acknowledged):
                 {'label':'Mercury Plating','value':'hg_au_electrode_plating'},
                 {'label':'Electrode Testing','value':'hg_au_electrode_testing'}]
         elif value == 'profiler':
-            options = [{'label':'Cyclic Voltammetry Profile','value':'profiler_cv'}]
+            options = [
+                {'label':'Cyclic Voltammetry Profile','value':'profiler_cv'},
+                {'label':'Linear Sweep Voltammetry Profile','value':'profiler_lsv'},
+                {'label':'Differential Pulse Voltammetry Profile','value':'profiler_dpv'},
+                {'label':'Squarewave Voltammetry Profile','value':'profiler_swv'},]  
         else:
             options = []
         if update == update_acknowledged:
@@ -727,6 +821,9 @@ component_lists={
     'hg_au_electrode_plating':hg_au_electrode_plating_components,
     'hg_au_electrode_testing':hg_au_electrode_testing_components,
     'profiler_cv':profiler_cv_components,
+    'profiler_lsv':profiler_lsv_components,
+    'profiler_dpv':profiler_dpv_components,
+    'profiler_swv':profiler_swv_components,
     }
     
 @app.callback(
