@@ -105,3 +105,4 @@ def cv_measurement(config, motor, ser, file):
     
     aux.start()
     s_measurement.run() 
+    write_config([{'component':'scan_progress','attribute':'value','value':100}])

@@ -79,5 +79,7 @@ def controls_disabled(off):
                   {'component':'upload_button','attribute':'disabled','value':off},
                   {'component':'download_button','attribute':'disabled','value':off},
                   {'component':'start_button','attribute':'disabled','value':off},
+                  {'component':'home_button','attribute':'disabled','value':off},
+                  {'component':'move_step_button','attribute':'disabled','value':off},
                   {'component':'stop_button','attribute':'disabled','value':on},
                   {'component':'change_directory_button','attribute':'disabled','value':off},])

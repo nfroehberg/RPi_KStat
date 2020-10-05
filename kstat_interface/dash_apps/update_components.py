@@ -89,6 +89,7 @@ update_list=[
     ('move_step_button','triggered',True),
     ('move_step_button','disabled',False),
     ('profiler_position','children',False),
+    ('directory_and_scan_refresher','data',False)
     ]
 
 ####################################################################

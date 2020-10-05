@@ -24,7 +24,7 @@ def profiler_home(config,profiler,mm):
     profiler.set_max_deceleration(max_acceleration)
     speed = config['max_speed_input']['value'] * mm * 10000 * -1
     profiler.move_to_limit(speed)
-    position = 'Profiler Position: {:04.1f} mm'.format(profiler.get_current_position()/mm)
+    position = 'Profiler Position: {:05.1f} mm'.format(profiler.get_current_position()/mm)
     write_config([{'component':'start_button','attribute':'disabled','value':False},
                     {'component':'home_button','attribute':'disabled','value':False},
                     {'component':'move_step_button','attribute':'disabled','value':False},
@@ -41,7 +41,7 @@ def profiler_move_step(config,profiler,mm):
     target = config['profile_step_distance_input']['value']
     target = profiler.get_current_position() + int(target*mm)
     profiler.move_to_position(target)
-    position = 'Profiler Position: {:04.1f} mm'.format(profiler.get_current_position()/mm)
+    position = 'Profiler Position: {:05.1f} mm'.format(profiler.get_current_position()/mm)
     write_config([{'component':'start_button','attribute':'disabled','value':False},
                     {'component':'home_button','attribute':'disabled','value':False},
                     {'component':'move_step_button','attribute':'disabled','value':False},

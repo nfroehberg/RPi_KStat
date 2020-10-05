@@ -28,6 +28,9 @@ def initialize_components():
                   {'component':'start_button','attribute':'disabled','value':False},
                   {'component':'home_button','attribute':'disabled','value':False},
                   {'component':'move_step_button','attribute':'disabled','value':False},
+                  {'component':'upload_button','attribute':'disabled','value':False},
+                  {'component':'download_button','attribute':'disabled','value':False},
+                  {'component':'change_directory_button','attribute':'disabled','value':False},
                   {'component':'stop_button','attribute':'disabled','value':True},
                   ])
 

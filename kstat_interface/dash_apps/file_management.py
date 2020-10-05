@@ -29,6 +29,7 @@ def directory_and_scan_selection():
         children=[
             dcc.Interval(id='directory_and_scan_initialization',disabled=False),
             dcc.Store(id='files_initialization'),
+            dcc.Store(id='directory_and_scan_refresher'),
             
             dcc.Store(id='scan_selector_value_update', data=1),
             dcc.Store(id='scan_selector_value_update_acknowledged', data=2),
@@ -270,8 +271,9 @@ def label_sort(option_dict):
 @app.callback(
     [Output('files_initialization','data'),
     Output('directory_and_scan_initialization','disabled')],
-    [Input('directory_and_scan_initialization','n_intervals')])
-def initializeFiles(n_intervals):
+    [Input('directory_and_scan_initialization','n_intervals'),
+     Input('directory_and_scan_refresher','data')])
+def initializeFiles(n_intervals,refresher):
     return [time(),True]
 
 ##############################################################
