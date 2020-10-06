@@ -104,6 +104,7 @@ def plot_scan():
      Output('scan_parameters_collapse','children'),
      Output('noise_filter_container','style'),
      Output('peak_file_data','data'),
+     Output('o2_measurement_data','data'),
      Output('scan_settings_storage','data')],
     [Input('voltammogram_graph_file2','modified_timestamp'),
      Input('voltammogram_graph_file3','modified_timestamp'),
@@ -279,6 +280,7 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,grap
     
     # O2 Measurements
     # detecting low point in lower window (after O2 peak) and high point in upper window (H2O2 peak)
+    o2_file=''
     if config['o2_measurement_switch']['on']:
         # isolating lower and upper window in data
         lower_left = config['o2_lower_left_input']['value']
@@ -319,6 +321,11 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,grap
         delta_y = low_point_y + (delta_current/2)
         delta_text = 'Delta:<br>{:.2E} A'.format(delta_current)
         
+        # file output
+        o2_file = [file.replace('.csv','-o2_measurement.txt')]
+        o2_file.append('ID,LowerU [mV],LowerI [A],UpperU [mV],UpperI [A],Delta [I]\n')
+        o2_file[1] = o2_file[1] + '{},{:.0f},{:.2E},{:.0f},{:.2E},{:.2E},\n'.format(graph_title,low_point_x,low_point_y,high_point_x,high_point_y,delta_current)
+        
         # adding to plot
         plot_data.append({'x':[low_point_x,high_point_x],'y':[low_point_y,high_point_y],
                           'mode':'markers+text','marker':{'color':theme['o2_measurement_color']},
@@ -336,7 +343,7 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,grap
         'data':plot_data,
         'layout':layout
         }
-    return [figure,graph_config,collapse_params,noise_filter,peakfile,scan_settings]
+    return [figure,graph_config,collapse_params,noise_filter,peakfile,o2_file,scan_settings]
 
 # if points on graph are clicked, get index. if already two points are selected, remove all
 # if graph file is changed, clear points

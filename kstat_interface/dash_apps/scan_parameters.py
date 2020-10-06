@@ -35,17 +35,25 @@ def scan_parameters():
             html.Div(className='centered_row',
                 children=[
                     noise_filter(),
+                    html.Div(style={'width':'5px'}),
                     html.Button(children='Scan Parameters',
                         id='scan_parameters_button',
                         style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
+                    dbc.Tooltip('Show scan settings for the displayed voltammogramm',
+                        target = 'scan_parameters_button'),
                     html.Div(style={'width':'5px'}),
                     html.Button(children='Peak Detection',
                         id='peak_detection_button',
                         style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
+                    dbc.Tooltip('Peak detection and baseline correction of normal voltammetric peaks',
+                        target = 'peak_detection_button'),
                     html.Div(style={'width':'5px'}),
-                    html.Button(children='Oxygen Measurement',
-                        id='o2_measurement_button',
-                        style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
+                    html.Div(id='o2_measurement_button_container',
+                        children=html.Button(children='Oxygen Measurement',
+                            id='o2_measurement_button',
+                            style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'})),
+                    dbc.Tooltip('O2 measurement based on delta current from the low point after the O2 peak to the H2O2 peak',
+                        target = 'o2_measurement_button'),
                     ]),
             dbc.Collapse(id='scan_parameters_collapse',
                         children=html.Button(id='copy_scan_settings_button',children='Copy Scan Parameters to Current Settings')),
@@ -73,7 +81,13 @@ def scan_parameters():
                     o2_lower_left(),
                     o2_lower_right(),
                     o2_upper_left(),
-                    o2_upper_right()])
+                    o2_upper_right(),
+                    html.Button(id='save_o2_measurement_button',children='Save Measurement',
+                        style={'width':'225px','justifyContent':'center'}),
+                    dbc.Tooltip('Save O2 measurement data to txt file', target='save_o2_measurement_button'),
+                    dcc.Store(id='o2_measurement_data',data=''),
+                    dcc.Store(id='o2_file_placeholder'),
+                    ])
                 ])
 
 @app.callback(
@@ -420,6 +434,7 @@ def noise_filter():
             html.Button(id='noise_filter_button',
                 children='Noise Filter',
                 style={'width':'120px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px','padding':'0 0'}),
+            dbc.Tooltip('Remove environmental AC noise from scan',target='noise_filter_button'),
             html.Div(style={'width':'5px'}),
             dcc.Store(id='noise_frequency_input_value_update', data=1),
             dcc.Store(id='noise_frequency_input_value_update_acknowledged', data=2),
@@ -499,6 +514,7 @@ def o2_lower_left():
                         )
                     )
                 ),
+            dbc.Tooltip('left limit for lower detection window', target = 'o2_lower_left_input'),
             dcc.Store(id='o2_lower_left_input_value_update', data=1),
             dcc.Store(id='o2_lower_left_input_value_update_acknowledged', data=2),
             dcc.Store(id='o2_lower_left_input_graph_update'),
@@ -540,6 +556,7 @@ def o2_lower_right():
                         )
                     )
                 ),
+            dbc.Tooltip('right limit for lower detection window', target = 'o2_lower_right_input'),
             dcc.Store(id='o2_lower_right_input_value_update', data=1),
             dcc.Store(id='o2_lower_right_input_value_update_acknowledged', data=2),
             dcc.Store(id='o2_lower_right_input_graph_update'),
@@ -580,6 +597,7 @@ def o2_upper_left():
                         )
                     )
                 ),
+            dbc.Tooltip('left limit for upper detection window', target = 'o2_upper_left_input'),
             dcc.Store(id='o2_upper_left_input_value_update', data=1),
             dcc.Store(id='o2_upper_left_input_value_update_acknowledged', data=2),
             dcc.Store(id='o2_upper_left_input_graph_update'),
@@ -621,6 +639,7 @@ def o2_upper_right():
                         )
                     )
                 ),
+            dbc.Tooltip('right limit for upper detection window', target = 'o2_upper_right_input'),
             dcc.Store(id='o2_upper_right_input_value_update', data=1),
             dcc.Store(id='o2_upper_right_input_value_update_acknowledged', data=2),
             dcc.Store(id='o2_upper_right_input_graph_update'),
@@ -674,3 +693,15 @@ def activate_o2_measurement(switch, update, update_acknowledged):
         return [no_update, time()]
     else:
         return [update, no_update]
+        
+@app.callback(
+     Output('o2_file_placeholder','data'),
+    [Input('save_o2_measurement_button','n_clicks')],
+    [State('o2_measurement_data','data')])
+def save_peak_data(n_clicks,data):
+    if n_clicks != None:
+        if data != '':
+            f = open(data[0],'w')
+            f.write(data[1])
+            f.close()
+    raise PreventUpdate
