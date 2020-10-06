@@ -18,7 +18,7 @@ import RPi.GPIO as GPIO
 from multiprocessing import Process
 
 # Serial address of KStat at specific USB port
-KStat_path = '/dev/serial/by-path/platform-3f980000.usb-usb-0:1.3:1.0'
+KStat_path = '/dev/serial/by-path/platform-3f980000.usb-usb-0:1.5:1.0'
 
 # set control components to be enabled/disabled correctly in case program exited incorrectly before
 def initialize_components():
