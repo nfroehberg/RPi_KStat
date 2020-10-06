@@ -34,7 +34,9 @@ def directory_and_scan_selection():
             html.Button( id='previous_scan_button',
                         style={'fontSize':'xx-large','border': '0','padding':'0 10px'},
                         children=u"\U000002C2"),
+            dbc.Tooltip('show previous scan (hotkey: Y)',target='previous_scan_button'),
             dcc.Store(id='previous_scan_placeholder'),
+            dcc.Store(id='previous_scan_key'),
             dcc.Store(id='scan_selector_value_update', data=1),
             dcc.Store(id='scan_selector_value_update_acknowledged', data=2),
             dcc.Dropdown(id='scan_selector',
@@ -43,7 +45,9 @@ def directory_and_scan_selection():
             html.Button( id='next_scan_button',
                         style={'fontSize':'xx-large','border': '0','padding':'0 10px'},
                         children=u"\U000002C3"),
+            dbc.Tooltip('show next scan (hotkey: X)',target='next_scan_button'),
             dcc.Store(id='next_scan_placeholder'),
+            dcc.Store(id='next_scan_key'),
                 
             html.Div(style={'width':'5px'}),
             html.P(id='directory_text',
@@ -228,14 +232,15 @@ def select_scan(value, update, update_acknowledged):
 
 
 
-# Go to previous or next voltammogram
+# Go to previous or next voltammogram (activated by click on button or hotkeys X/Y
 @app.callback(
      Output('previous_scan_placeholder','data'),
-    [Input('previous_scan_button','n_clicks')],
+    [Input('previous_scan_button','n_clicks'),
+     Input('previous_scan_key','data')],
     [State('scan_selector','options'),
      State('scan_selector','value')])
-def previous_scan(n_clicks,options,current_value):
-    if n_clicks != None:
+def previous_scan(n_clicks,key,options,current_value):
+    if n_clicks != None or key != None:
         values = []
         for option in options:
             values.append(option['value'])
@@ -247,11 +252,12 @@ def previous_scan(n_clicks,options,current_value):
         raise PreventUpdate
 @app.callback(
      Output('next_scan_placeholder','data'),
-    [Input('next_scan_button','n_clicks')],
+    [Input('next_scan_button','n_clicks'),
+     Input('next_scan_key','data')],
     [State('scan_selector','options'),
      State('scan_selector','value')])
-def next_scan(n_clicks,options,current_value):
-    if n_clicks != None:
+def next_scan(n_clicks,key,options,current_value):
+    if n_clicks != None or key != None:
         values = []
         for option in options:
             values.append(option['value'])

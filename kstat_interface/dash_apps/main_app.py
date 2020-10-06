@@ -11,6 +11,7 @@ import dash_daq as daq
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from dash_extensions import Keyboard
 from dash import no_update
 from time import time,sleep
 from redisworks import Root
@@ -42,6 +43,8 @@ def main():
     return html.Div(
         className='main_program',
         children=[
+        Keyboard(id='keyboard'),
+        html.Div(id="output"),
         update_components(),
         html.Div(id='graph_and_file_management',
             className='sub_program',
@@ -147,4 +150,17 @@ def main():
             ]
         )
     ])
-
+    
+# capture keystrokes and use for hotkey functions
+@app.callback([Output('next_scan_key','data'),
+               Output('previous_scan_key','data')], 
+             [Input("keyboard", "n_keydowns")],
+             [State('keyboard','keydown')])
+def keydown(n_keydown,event):
+    print(event['key'])
+    if event['key'] == 'x':
+        return [time(),no_update]
+    elif event['key'] == 'y':
+        return [no_update,time()]
+    else:
+        raise PreventUpdate
