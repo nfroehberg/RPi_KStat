@@ -1,5 +1,5 @@
 from kstat_interface.backend_apps.drivers.tb6612_motor_driver import TB6612
-from kstat_interface.backend_apps.drivers.pololu_tic_driver import TicSerial
+from kstat_interface.backend_apps.drivers.pololu_tic_driver import TicUSB
 from time import sleep, time
 import kstat_interface.backend_apps.drivers.KStat_0_1_driver as KStat
 from serial import Serial
@@ -7,7 +7,7 @@ from sched import scheduler
 from multiprocessing import Process
 from redisworks import Root
 from ast import literal_eval
-from kstat_interface.dash_apps.app import write_config
+from kstat_interface.dash_apps.app import write_config, controls_disabled
 from kstat_interface.backend_apps.hg_au_electrode_plating import hg_au_electrode_plating
 from kstat_interface.backend_apps.hg_au_electrode_testing import hg_au_electrode_testing
 from kstat_interface.backend_apps.single_cv import single_cv
@@ -20,6 +20,8 @@ from kstat_interface import redis_config
 import RPi.GPIO as GPIO
 from multiprocessing import Process
 from glob import glob
+#from serial import Serial
+from smbus2 import SMBus
 
 # set control components to be enabled/disabled correctly in case program exited incorrectly before
 def initialize_components():
@@ -32,6 +34,9 @@ def initialize_components():
                   {'component':'download_button','attribute':'disabled','value':False},
                   {'component':'change_directory_button','attribute':'disabled','value':False},
                   {'component':'stop_button','attribute':'disabled','value':True},
+                  {'component':'stop_button','attribute':'triggered','value':False},
+                  {'component':'start_button','attribute':'triggered','value':False},
+                  {'component':'move_step_button','attribute':'triggered','value':False},
                   ])
 
 # start redisworks server and store initial config
@@ -76,11 +81,12 @@ def initialize_profiler():
     mm = steps_per_rotation/screw_pitch
     
     config = literal_eval(str(root.config))
-    max_speed = config['max_speed_input']['value'] * mm * 10000
-    max_acceleration = config['max_acceleration_input']['value'] * mm * 100
+    max_speed = int(config['max_speed_input']['value'] * mm * 10000)
+    max_acceleration = int(config['max_acceleration_input']['value'] * mm * 100)
     try:
-        port = serial.Serial(port_name="/dev/serial0", baud_rate=9600, timeout=0.1, write_timeout=0.1)
-        profiler = TicSerial(port,limits=True)
+        #port = Serial("/dev/serial0", 9600, timeout=0.1, write_timeout=0.1)
+        #profiler = TicSerial(port,limits=True)
+        profiler = TicUSB(limits=True)
         profiler.reset()
         profiler.energize()
         profiler.halt_and_set_position()
@@ -88,8 +94,9 @@ def initialize_profiler():
         profiler.set_max_speed(max_speed)
         profiler.set_max_acceleration(max_acceleration)
         profiler.set_max_deceleration(max_acceleration)
-    except:
-        print('Could not initialize profiler')
+        profiler.set_current_limit(124)
+    except Exception as e:
+        print('Could not initialize profiler', e)
         profiler = 9
 
 stored_stamp = ''
@@ -154,12 +161,9 @@ if __name__ == '__main__':
                             
                         if config['stop_button']['triggered']:
                             print('stop', config['program_selection']['value'])
+                            controls_disabled(False)
                             write_config([{'component':'purge_switch','attribute':'on','value':measurement_config['purge_switch']['on']},
-                                            {'component':'purge_switch','attribute':'disabled','value':False},
                                             {'component':'stirr_switch','attribute':'on','value':measurement_config['stirr_switch']['on']},
-                                            {'component':'stirr_switch','attribute':'disabled','value':False},
-                                            {'component':'start_button','attribute':'disabled','value':False},
-                                            {'component':'stop_button','attribute':'disabled','value':True},
                                             {'component':'stop_button','attribute':'triggered','value':False},
                                             {'component':'scan_progress_label','attribute':'children','value':'Cancelled'}])
                             measurement.terminate()
