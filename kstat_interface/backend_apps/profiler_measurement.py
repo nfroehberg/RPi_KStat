@@ -95,7 +95,9 @@ def profiler_measurement(type,config,motor,ser,profiler,mm):
                         {'component':'series_progress','attribute':'value','value':((i+2)/(n_steps+1))*100},
                         {'component':'series_progress_label','attribute':'children','value':'Measurement {}/{}'.format(i+2,n_steps+1)},])
         target = profiler.get_current_position() + int(step_distance*mm)
+        profiler.energize()
         profiler.move_to_position(target)
+        profiler.deenergize()
         old_position = position
         position = profiler.get_current_position()/mm
         position_text = 'Profiler Position: {:05.1f} mm'.format(position)

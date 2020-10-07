@@ -87,7 +87,7 @@ def initialize_profiler():
         #port = Serial("/dev/serial0", 9600, timeout=0.1, write_timeout=0.1)
         #profiler = TicSerial(port,limits=True)
         profiler = TicUSB(limits=True)
-        profiler.reset()
+        #profiler.reset()
         profiler.energize()
         profiler.halt_and_set_position()
         profiler.set_step_mode(step_mode)
@@ -95,6 +95,7 @@ def initialize_profiler():
         profiler.set_max_acceleration(max_acceleration)
         profiler.set_max_deceleration(max_acceleration)
         profiler.set_current_limit(124)
+        profiler.deenergize()
     except Exception as e:
         print('Could not initialize profiler', e)
         profiler = 9
