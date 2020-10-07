@@ -31,11 +31,19 @@ def directory_and_scan_selection():
             dcc.Store(id='files_initialization'),
             dcc.Store(id='directory_and_scan_refresher'),
             
+            html.Button( id='previous_scan_button',
+                        style={'fontSize':'xx-large','border': '0','padding':'0 10px'},
+                        children=u"\U000002C2"),
+            dcc.Store(id='previous_scan_placeholder'),
             dcc.Store(id='scan_selector_value_update', data=1),
             dcc.Store(id='scan_selector_value_update_acknowledged', data=2),
             dcc.Dropdown(id='scan_selector',
                 style={'width':'250px','color':'black'},
                 clearable=False),
+            html.Button( id='next_scan_button',
+                        style={'fontSize':'xx-large','border': '0','padding':'0 10px'},
+                        children=u"\U000002C3"),
+            dcc.Store(id='next_scan_placeholder'),
                 
             html.Div(style={'width':'5px'}),
             html.P(id='directory_text',
@@ -217,6 +225,43 @@ def select_scan(value, update, update_acknowledged):
         return [no_update, value, time()]
     else:
         return [update, value, time()]
+
+
+
+# Go to previous or next voltammogram
+@app.callback(
+     Output('previous_scan_placeholder','data'),
+    [Input('previous_scan_button','n_clicks')],
+    [State('scan_selector','options'),
+     State('scan_selector','value')])
+def previous_scan(n_clicks,options,current_value):
+    if n_clicks != None:
+        values = []
+        for option in options:
+            values.append(option['value'])
+        index = values.index(current_value)
+        if index > 0:
+            write_config([{'component':'scan_selector','attribute':'value','value':values[index-1]}])
+        raise PreventUpdate
+    else:
+        raise PreventUpdate
+@app.callback(
+     Output('next_scan_placeholder','data'),
+    [Input('next_scan_button','n_clicks')],
+    [State('scan_selector','options'),
+     State('scan_selector','value')])
+def next_scan(n_clicks,options,current_value):
+    if n_clicks != None:
+        values = []
+        for option in options:
+            values.append(option['value'])
+        index = values.index(current_value)
+        if index < (len(values)-1):
+            write_config([{'component':'scan_selector','attribute':'value','value':values[index+1]}])
+        raise PreventUpdate
+    else:
+        raise PreventUpdate
+
 
 @app.callback(
     [Output('directory_selection','options'),
