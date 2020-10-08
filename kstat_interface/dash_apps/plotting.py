@@ -90,6 +90,8 @@ def plot_scan():
             dcc.Store(id='voltammogram_graph_file5'),
             dcc.Store(id='voltammogram_graph_file6'),
             dcc.Store(id='voltammogram_graph_file7'),
+            dcc.Store(id='voltammogram_graph_file8'),
+            dcc.Store(id='voltammogram_graph_file9'),
             dcc.Store(id='voltammogram_point1',data='no point'),
             dcc.Store(id='voltammogram_point2',data='no point'),
             dcc.Store(id='clear_points'),
@@ -111,13 +113,15 @@ def plot_scan():
      Input('voltammogram_graph_file4','modified_timestamp'),
      Input('voltammogram_graph_file5','modified_timestamp'),
      Input('voltammogram_graph_file6','modified_timestamp'),
-     Input('voltammogram_graph_file7','modified_timestamp')],
+     Input('voltammogram_graph_file7','modified_timestamp'),
+     Input('voltammogram_graph_file8','modified_timestamp'),
+     Input('voltammogram_graph_file9','modified_timestamp')],
     [State('voltammogram_graph_file','data'),
      State('voltammogram_point1','data'),
      State('voltammogram_point2','data'),
      State('voltammogram_graph','config'),
      State('theme_switch','on')])
-def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,graph_config,theme_switch):
+def update_plot_scan(file2,file3,file4,file5,file6,file7,file8,file9,file,point1,point2,graph_config,theme_switch):
     ctx = dash.callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
@@ -178,13 +182,14 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,grap
     x_data = df.potential
     plot_data=[{'x':x_data,'marker':{'color':theme['current_color']},'name':'current'}]
     
+    # Apply IIR Notch FIlter if activated
     noise_filter_button = config['noise_filter_button']['children']
     noise_frequency = config['noise_frequency_input']['value']
     if params['type']['value'] in ['Cyclic Voltammetry','Linear Sweep Voltammetry']:
         y_data = df.current
         plot_data[0]['y'] = y_data
         noise_filter = {'display':'flex','alignItems':'center'}
-        if noise_filter_button == 'Noise Filter On':
+        if noise_filter_button == 'IIR Notch Filter On':
             data_label = 'current_filtered_{}Hz'.format(noise_frequency)
             if data_label in df.columns:
                 y_data = df[data_label]
@@ -199,6 +204,14 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file,point1,point2,grap
         plot_data[0]['y'] = y_data
         noise_filter = {'display':'none'}
     
+    # Apply Rolling Average Filter if activated    
+    rolling_average_button = config['rolling_average_button']['children']
+    rolling_window = config['rolling_window_input']['value']
+    if rolling_average_button == 'Rolling Average On':
+        y_data = y_data.rolling(window=rolling_window).mean()
+        plot_data[0]['y'] = y_data
+    
+    # Peak Detection
     if not config['peak_detection_switch']['on'] and point1 == 'no point':
         peakfile = ''
     else:

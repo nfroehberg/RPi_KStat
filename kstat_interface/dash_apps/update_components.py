@@ -67,6 +67,8 @@ update_list=[
     ('upload_button','disabled',False),
     ('download_button','disabled',False),
     ('noise_filter_button','children',False),
+    ('rolling_average_button','children',False),
+    ('rolling_window_input','value',True),
     ('noise_frequency_input','value',True),
     ('peak_detection_switch','on',True),
     ('baseline_switch','on',True),

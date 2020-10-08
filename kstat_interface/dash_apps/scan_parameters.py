@@ -34,7 +34,9 @@ def scan_parameters():
         children=[
             html.Div(className='centered_row',
                 children=[
-                    noise_filter(),
+                    html.Button(children='Filtering',
+                        id='filter_button',
+                        style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'}),
                     html.Div(style={'width':'5px'}),
                     html.Button(children='Scan Parameters',
                         id='scan_parameters_button',
@@ -54,7 +56,13 @@ def scan_parameters():
                             style={'width':'250px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px'})),
                     dbc.Tooltip('O2 measurement based on delta current from the low point after the O2 peak to the H2O2 peak',
                         target = 'o2_measurement_button'),
+                    html.Div(style={'width':'5px'}),
                     ]),
+            dbc.Collapse(id='filter_collapse',
+                children=[
+                    noise_filter(),
+                    rolling_average_filter(),
+                        ]),
             dbc.Collapse(id='scan_parameters_collapse',
                         children=html.Button(id='copy_scan_settings_button',children='Copy Scan Parameters to Current Settings')),
             dbc.Collapse(id='peak_detection_collapse',
@@ -393,14 +401,17 @@ def activate_peak_detection(switch, update, update_acknowledged):
 @app.callback(
     [Output('scan_parameters_collapse','is_open'),
      Output('peak_detection_collapse','is_open'),
-     Output('o2_measurement_collapse','is_open')],
+     Output('o2_measurement_collapse','is_open'),
+     Output('filter_collapse','is_open')],
     [Input('scan_parameters_button','n_clicks'),
      Input('peak_detection_button','n_clicks'),
-     Input('o2_measurement_button','n_clicks')],
+     Input('o2_measurement_button','n_clicks'),
+     Input('filter_button','n_clicks')],
     [State('scan_parameters_collapse','is_open'),
      State('peak_detection_collapse','is_open'),
-     State('o2_measurement_collapse','is_open')])
-def open_scan_parameters(parameters_clicks,peak_clicks,o2_clicks,parameter_open,peak_open,o2_open):
+     State('o2_measurement_collapse','is_open'),
+     State('filter_collapse','is_open')])
+def open_scan_parameters(parameters_clicks,peak_clicks,o2_clicks,filter_clicks,parameter_open,peak_open,o2_open,filter_open):
     ctx = callback_context
     if ctx.triggered[0]['value'] is None:
         raise PreventUpdate
@@ -408,21 +419,27 @@ def open_scan_parameters(parameters_clicks,peak_clicks,o2_clicks,parameter_open,
     
     if trigger_id == 'scan_parameters_button':
         if parameter_open:
-            return [False, False, False]
+            return [False, False, False, False]
         else:
-            return [True, False, False]
+            return [True, False, False, False]
             
     elif trigger_id == 'peak_detection_button':
         if peak_open:
-            return [False, False, False]
+            return [False, False, False, False]
         else:
-            return [False, True, False]
+            return [False, True, False, False]
             
     elif trigger_id == 'o2_measurement_button':
         if o2_open:
-            return [False, False, False]
+            return [False, False, False, False]
         else:
-            return [False, False, True]
+            return [False, False, True, False]
+            
+    elif trigger_id == 'filter_button':
+        if filter_open:
+            return [False, False, False, False]
+        else:
+            return [False, False, False, True]
     
     else:
         raise PreventUpdate
@@ -432,8 +449,8 @@ def noise_filter():
         className='left_row',
         children=[
             html.Button(id='noise_filter_button',
-                children='Noise Filter',
-                style={'width':'120px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px','padding':'0 0'}),
+                children='IIR Notch Filter',
+                style={'width':'150px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px','padding':'0 0'}),
             dbc.Tooltip('Remove environmental AC noise from scan',target='noise_filter_button'),
             html.Div(style={'width':'5px'}),
             dcc.Store(id='noise_frequency_input_value_update', data=1),
@@ -461,17 +478,84 @@ def set_noise_filter(n_clicks,file):
     config = literal_eval(str(root.config))
     state = config['noise_filter_button']['children']
     if n_clicks != None:
-        if state == 'Noise Filter Off':
+        if state == 'IIR Notch Filter Off':
             write_config([{'component':'noise_filter_button',
-                       'attribute':'children','value':'Noise Filter On'}])
-            return file
+                       'attribute':'children','value':'IIR Notch Filter On'}])
+            return time()
         else:
             write_config([{'component':'noise_filter_button',
-                       'attribute':'children','value':'Noise Filter Off'}])
-            return file
+                       'attribute':'children','value':'IIR Notch Filter Off'}])
+            return time()
     else:
         raise PreventUpdate
 
+def rolling_average_filter():
+    return html.Div(id='rolling_average_container',
+        className='left_row',
+        children=[
+            html.Button(id='rolling_average_button',
+                children='Rolling Average',
+                style={'width':'150px','fontSize':'xx-small','border': '1px solid #bbb','lineHeight': '20px','padding':'0 0'}),
+            dbc.Tooltip('Apply a rolling average filter to smooth data',target='rolling_average_button'),
+            html.Div(style={'width':'5px'}),
+            dcc.Store(id='rolling_window_input_value_update', data=1),
+            dcc.Store(id='rolling_window_input_value_update_acknowledged', data=2),
+            dcc.Input(id='rolling_window_input',
+                type='number',
+                style={'backgroundColor':'transparent','color':'rgb(200, 200, 200)','width':'50px','height':'20px',
+                'fontSize':'small','textAlign':'center','border': '1px solid #bbb'},
+                debounce=True,
+                ),
+            dbc.Tooltip('Number of data points to calculate average windows',
+                target='rolling_window_input'),
+            html.Label(htmlFor='rolling_window_input',
+                children='Window',
+                style={'width':'70px','height':'20px','fontSize':'small','padding':'5px 5px'})
+            ])
+
+# activate/deactivate Rolling Average filter
+@app.callback(
+     Output('voltammogram_graph_file8','data'),
+    [Input('rolling_average_button','n_clicks')],
+    [State('voltammogram_graph_file','data')])
+def set_rolling_average(n_clicks,file):
+    root.flush()
+    config = literal_eval(str(root.config))
+    state = config['rolling_average_button']['children']
+    if n_clicks != None:
+        if state == 'Rolling Average Off':
+            write_config([{'component':'rolling_average_button',
+                       'attribute':'children','value':'Rolling Average On'}])
+            return time()
+        else:
+            write_config([{'component':'rolling_average_button',
+                       'attribute':'children','value':'Rolling Average Off'}])
+            return time()
+    else:
+        raise PreventUpdate
+        
+# Set Window for rolling average filter and trigger graph update if filter is activated
+@app.callback(
+    [Output('rolling_window_input_value_update_acknowledged','data'),
+     Output('voltammogram_graph_file9','data')],
+    [Input('rolling_window_input','value')],
+    [State('rolling_window_input_value_update','data'),
+     State('rolling_window_input_value_update_acknowledged','data'),
+     State('voltammogram_graph_file','data')])
+def update_rolling_window(value, update, update_acknowledged, file):
+    root.flush()
+    config = literal_eval(str(root.config))
+    state = config['rolling_average_button']['children']
+    if update == update_acknowledged:
+        write_config([{'component':'rolling_window_input',
+                       'attribute':'value','value':value}])
+        if state == 'Rolling Average On':
+            return [no_update, time()]
+        else:
+            raise PreventUpdate
+    else:
+        return [update, no_update]
+        
 # Set AC frequency for noise filter and trigger graph update if filter is activated
 @app.callback(
     [Output('noise_frequency_input_value_update_acknowledged','data'),
@@ -488,7 +572,7 @@ def update_noise_frequency(value, update, update_acknowledged, file):
         write_config([{'component':'noise_frequency_input',
                        'attribute':'value','value':value}])
         if state == 'Noise Filter On':
-            return [no_update, file]
+            return [no_update, time()]
         else:
             raise PreventUpdate
     else:
