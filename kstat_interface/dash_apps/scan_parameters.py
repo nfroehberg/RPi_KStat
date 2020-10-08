@@ -86,6 +86,7 @@ def scan_parameters():
                 className='left_row',
                 children=[
                     o2_measurement_switch(),
+                    o2_autosave_switch(),
                     o2_lower_left(),
                     o2_lower_right(),
                     o2_upper_left(),
@@ -111,8 +112,9 @@ def scan_parameters():
      Input('o2_upper_left_input_graph_update','modified_timestamp'),
      Input('o2_lower_right_input_graph_update','modified_timestamp'),
      Input('o2_lower_left_input_graph_update','modified_timestamp'),
-     Input('o2_measurement_switch_graph_update','modified_timestamp'),])
-def update_graph_peak(input1,input2,input3,input4,input5,input6,input7,input8,input9,input10,input11,input12):
+     Input('o2_measurement_switch_graph_update','modified_timestamp'),
+     Input('o2_autosave_switch_graph_update','modified_timestamp'),])
+def update_graph_peak(input1,input2,input3,input4,input5,input6,input7,input8,input9,input10,input11,input12,input13):
     return time()
 
 @app.callback(
@@ -763,7 +765,7 @@ def o2_measurement_switch():
             dcc.Store(id='o2_measurement_switch_graph_update'),]
     )
     
-# if state of purge switch changes, write to config file
+# if state of o2 measurement switch changes, write to config file
 @app.callback(
     [Output('o2_measurement_switch_on_update_acknowledged','data'),
      Output('o2_measurement_switch_graph_update','data')],
@@ -773,6 +775,38 @@ def o2_measurement_switch():
 def activate_o2_measurement(switch, update, update_acknowledged):
     if update == update_acknowledged:
         write_config([{'component':'o2_measurement_switch','attribute':'on','value':switch}])
+        root.flush()
+        return [no_update, time()]
+    else:
+        return [update, no_update]
+
+def o2_autosave_switch():
+    return html.Div(id='o2_autosave_switch_container',
+        className='centered_row',
+        children=[
+            daq.BooleanSwitch(id="o2_autosave_switch",style={'width':'95px'}),
+            html.Div(style={'width':'10px'}),
+            html.Label(
+                htmlFor='o2_autosave_switch',
+                children='Autosave',
+                style={'width':'110px'}),
+            dbc.Tooltip('Automatically save measurements to file (overwriting previous values)',
+                target='o2_autosave_switch'),
+            dcc.Store(id='o2_autosave_switch_on_update', data=1),
+            dcc.Store(id='o2_autosave_switch_on_update_acknowledged', data=2),
+            dcc.Store(id='o2_autosave_switch_graph_update'),]
+    )
+    
+# if state of o2 autosave switch changes, write to config file
+@app.callback(
+    [Output('o2_autosave_switch_on_update_acknowledged','data'),
+     Output('o2_autosave_switch_graph_update','data')],
+    [Input('o2_autosave_switch','on')],
+    [State('o2_autosave_switch_on_update','data'),
+    State('o2_autosave_switch_on_update_acknowledged','data')])
+def activate_o2_autosave(switch, update, update_acknowledged):
+    if update == update_acknowledged:
+        write_config([{'component':'o2_autosave_switch','attribute':'on','value':switch}])
         root.flush()
         return [no_update, time()]
     else:

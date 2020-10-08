@@ -338,6 +338,10 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file8,file9,file,point1
         o2_file = [file.replace('.csv','-o2_measurement.txt')]
         o2_file.append('ID,LowerU [mV],LowerI [A],UpperU [mV],UpperI [A],Delta [I],\n')
         o2_file[1] = o2_file[1] + '{},{:.0f},{:.2E},{:.0f},{:.2E},{:.2E},\n'.format(graph_title,low_point_x,low_point_y,high_point_x,high_point_y,delta_current)
+        if config['o2_autosave_switch']['on']:
+            f = open(o2_file[0],'w')
+            f.write(o2_file[1])
+            f.close()
         
         # adding to plot
         plot_data.append({'x':[low_point_x,high_point_x],'y':[low_point_y,high_point_y],

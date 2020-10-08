@@ -93,6 +93,7 @@ update_list=[
     ('profiler_position','children',False),
     ('directory_and_scan_refresher','data',False),
     ('o2_measurement_switch','on',True),
+    ('o2_autosave_switch','on',True),
     ('o2_upper_right_input','value',True),
     ('o2_upper_left_input','value',True),
     ('o2_lower_right_input','value',True),

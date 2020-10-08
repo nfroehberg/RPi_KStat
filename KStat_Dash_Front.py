@@ -147,6 +147,7 @@ initial_config={
     'profiler_position':{'children':'Profiler Position: 000.0 mm'},
     'directory_and_scan_refresher':{'data':0},
     'o2_measurement_switch':{'on':False},
+    'o2_autosave_switch':{'on':False},
     'o2_upper_right_input':{'value':-1750},
     'o2_upper_left_input':{'value':-1550},
     'o2_lower_left_input':{'value':-250},
