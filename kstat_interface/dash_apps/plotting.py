@@ -208,7 +208,7 @@ def update_plot_scan(file2,file3,file4,file5,file6,file7,file8,file9,file,point1
     rolling_average_button = config['rolling_average_button']['children']
     rolling_window = config['rolling_window_input']['value']
     if rolling_average_button == 'Rolling Average On':
-        y_data = y_data.rolling(window=rolling_window).mean()
+        y_data = y_data.rolling(window=rolling_window,center=True,win_type='triang',min_periods=1).mean()
         plot_data[0]['y'] = y_data
     
     # Peak Detection
