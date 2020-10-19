@@ -128,6 +128,13 @@ def check_update(n_intervals, stored_stamp):
         root.flush()
         config_stamp = str(root['update_timestamp'])
     except Exception as e:
+        try:
+            root.flush()
+            config_stamp = str(root['update_timestamp'])
+        except Exception as e:
+            print("Couldn't load config time stamp.", e)
+            raise PreventUpdate
+    except Exception as e:
         print("Couldn't load config time stamp.", e)
         raise PreventUpdate
     # if stored time stamp matches config, no update is necessary
