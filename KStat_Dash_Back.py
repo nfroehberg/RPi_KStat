@@ -89,7 +89,7 @@ def initialize_profiler():
         profiler = TicUSB(limits=True)
         #profiler.reset()
         profiler.energize()
-        profiler.halt_and_set_position()
+        #profiler.halt_and_set_position()
         profiler.set_step_mode(step_mode)
         profiler.set_max_speed(max_speed)
         profiler.set_max_acceleration(max_acceleration)

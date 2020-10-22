@@ -1035,7 +1035,7 @@ def n_electrode_tests():
                     children=daq.NumericInput(
                         id='n_electrode_tests_input',
                         min=0,
-                        max=100,
+                        max=999,
                         size=65
                         )
                     )
