@@ -21,9 +21,9 @@ sudo raspi-config
 #### Installing required packages
 
 ```
-sudo apt install libatlas-base-dev redis git screen
+sudo apt install libatlas-base-dev redis git screen python3-pip
 
-pip3 install scipy numpy peakutils matplotlib pandas plotly dash dash-daq dash-bootstrap-components redisworks
+pip3 install scipy numpy peakutils matplotlib pandas plotly dash dash-daq dash-bootstrap-components redisworks smbus2 pyyaml pyserial dash_extensions
 ```
 
 #### Setting up the Redis server
