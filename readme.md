@@ -112,9 +112,17 @@ For ease of operation, particularly in situations where you don't have access to
 curl -sL https://install.raspap.com | bash -s -- --yes
 ```
 
+ change port for RaspAP GUI:
+ ```
+ sudo nano /etc/lighttpd/lighttpd.conf
+ ```
+ change server.port to 8079
+  ```
+ sudo systemctl restart lighttpd.service
+  ```
 go to http://voltammetrypi.local/ (or http://<your hostname>.local/), login with username admin, password and set up hotspot SSID, password etc.
-
-To still provide internet access to the user when connected to the hotspot, the Pi can be connected via ethernet or a USB WiFi adapter (for example the TP-Link TL-WN725N worked well).
+ 
+ To still provide internet access to the user when connected to the hotspot, the Pi can be connected via ethernet or a USB WiFi adapter (for example the TP-Link TL-WN725N worked well).
 
 To use a USB WiFi adapter, the RaspAP configuration needs two small adjustments:
 
