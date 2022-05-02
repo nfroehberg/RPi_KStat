@@ -307,7 +307,7 @@ def squarewaveVoltammetry(ser, PGA_gain, iv_gain, t_preconditioning1,
               "{}\nUTC =\t\t\t{}\nTimestamp =\t\t{}\nParameters:\nSamplerate =\t\t{}\nt_preconditioning1 =\t{} s"+\
               "\nt_preconditioning2 =\t{} s\nv_preconditioning1 =\t{} mV\n"+\
               "v_preconditioning2 =\t{} mV\nstart =\t\t\t{} mV\nstop =\t\t\t{} mV\n"+\
-              "step_size =\t\t{} mV\npulse_height =\t\t{} mV\nfrequency =\t\t{} Hz\nn_scans"+\
+              "step_size =\t\t{} mV\npulse_height =\t\t{} mV\nfrequency =\t\t{} Hz\nn_scans "+\
               "=\t\t{}").format(comment, datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'),
                              datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'),
                              str(time.time()),sample_rate, str(t_preconditioning1), str(t_preconditioning2),
@@ -373,7 +373,7 @@ def catchSquarewaveVoltammetry(ser, PGA_gain, iv_gain, file, plotting):
         return "Error: Data transmission failed"
     else:
         result = []
-        for i in range(len(scans)):
+        for i in range(len(scans)-1):
             scan = scans[i]
             result.append({})
             potential = []
@@ -427,7 +427,7 @@ def catchSquarewaveVoltammetry(ser, PGA_gain, iv_gain, file, plotting):
                                
                 plt.close()
     
-        print('Scans: ', n_scans + 1)
+        print('Scans: ', n_scans)
         print("Processing complete")
         return result
 

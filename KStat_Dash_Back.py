@@ -54,9 +54,10 @@ def initialize_motor():
 # set up KStat potentiostat
 def initialize_KStat():
     devices = glob('/dev/serial/by-id/*')
+    #print(devices)
     KStat_port = ''
     for port in devices:
-        if 'DStat' in port:
+        if 'KStat' in port or 'DStat' in port:
             KStat_port = port
             global ser
             ser = Serial(KStat_port, 9600, timeout = 1)

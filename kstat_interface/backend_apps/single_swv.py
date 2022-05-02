@@ -31,11 +31,18 @@ def single_swv(config, motor, ser):
     KStat.idle(ser,0)
     
     file_options = config['scan_selector']['options']
-    file_options.append({'label':id,'value':file+'.csv'})
+    n_scans=config['n_scans_input']['value']
+    if n_scans == 1:
+        file_options.append({'label':id,'value':file+'.csv'})
+        file_value = file+'.csv'
+    else:
+        for i in range(n_scans):
+            file_options.append({'label':id+'-scan{}'.format(i),'value':file+'-scan{}.csv'.format(i)})
+        file_value = file+'-scan0.csv'
     write_config([{'component':'purge_switch','attribute':'on','value':config['purge_switch']['on']},                    
                   {'component':'stirr_switch','attribute':'on','value':config['stirr_switch']['on']},
                   {'component':'scan_selector','attribute':'options','value':file_options},
-                  {'component':'scan_selector','attribute':'value','value':file+'.csv'}])
+                  {'component':'scan_selector','attribute':'value','value':file_value}])
     controls_disabled(False)
 
 def swv_measurement(config, motor, ser, file):
