@@ -59,8 +59,8 @@ def initialize_KStat():
     for port in devices:
         if 'KStat' in port or 'DStat' in port:
             KStat_port = port
-            global ser
-            ser = Serial(KStat_port, 9600, timeout = 1)
+            global ser, ADSbuffer, sample_rate, PGA_gain, iv_gain
+            ser = Serial(KStat_port, 9600, timeout = 1) 
             ADSbuffer = 1
             sample_rate = "1KHz"
             PGA_gain = 2
@@ -136,6 +136,19 @@ if __name__ == '__main__':
                                             {'component':'stop_button','attribute':'disabled','value':False},
                                             {'component':'start_button','attribute':'disabled','value':True}])
                             measurement_config=config 
+                            
+                            # update gain settings of KStat if necessary:
+                            if config['iv_gain_input']['value'] != iv_gain:
+                                iv_gain = config['iv_gain_input']['value']
+                                KStat.abort(ser)
+                                KStat.setGain(ser, iv_gain)
+                                KStat.idle(ser,0)
+                            if config['pga_gain_input']['value'] != PGA_gain or config['samplefreq_input']['value'] != sample_rate:
+                                PGA_gain = config['pga_gain_input']['value']
+                                sample_rate = config['samplefreq_input']['value']
+                                KStat.abort(ser)
+                                KStat.setupADC(ser, ADSbuffer, sample_rate, PGA_gain)
+                                KStat.idle(ser,0)
                             
                             # find which program was selected and execute the corresponding script
                             if config['program_selection']['value'] == 'hg_au_electrode_plating':
